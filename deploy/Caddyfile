@@ -1,0 +1,50 @@
+# The edge: serves the back-office UI and the browser-facing half of the API
+# from one origin, so the page needs no CORS and no hardcoded API host.
+#
+#   SITE_ADDRESS=localhost          -> https://localhost, Caddy's own local CA
+#                                      (the browser warns once)
+#   SITE_ADDRESS=lustre.example.com -> a real certificate fetched and renewed
+#                                      automatically; needs public DNS and
+#                                      ports 80 and 443 reachable
+#
+# Only the paths the browser uses are forwarded. /api/events (the audit proxy's
+# ingest) and /api/proxy/config are deliberately NOT: the proxy reaches them
+# directly over the compose network, and /api/events has no authentication of
+# its own, so publishing it would let anyone forge audit records.
+{$SITE_ADDRESS:localhost} {
+	encode zstd gzip
+
+	# Browser protections on every response. The CSP is strict by design: web/
+	# carries no inline script or style, so neither needs an exception, and
+	# nothing may frame the page.
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		Content-Security-Policy "default-src 'self'; frame-ancestors 'none'"
+	}
+
+	@browser_api path /api/login /api/logout /api/connections /api/connections/* /api/statements /api/servers /api/admins /api/admins/* /api/actions /api/summary
+	handle @browser_api {
+		header Cache-Control no-store
+		reverse_proxy api:8080
+	}
+
+	handle /healthz {
+		reverse_proxy api:8080
+	}
+
+	# Everything else under /api is internal.
+	handle /api/* {
+		respond "not found" 404
+	}
+
+	handle {
+		root * /srv/web
+		@assets path *.css *.js *.json *.svg *.woff2
+		header @assets Cache-Control "no-cache"
+		@notassets not path *.css *.js *.json *.svg *.woff2
+		header @notassets Cache-Control "no-store"
+		file_server
+	}
+}

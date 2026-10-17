@@ -1,0 +1,5 @@
+# The edge serves web/ from the image rather than a bind mount, so a
+# production deployment carries its own copy of the UI instead of whatever
+# happens to be on the host.
+FROM caddy:2
+COPY web/ /srv/web/

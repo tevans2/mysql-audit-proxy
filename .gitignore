@@ -1,0 +1,21 @@
+.DS_Store
+
+# Module cache when GOPATH points inside the project (CI)
+.go/
+
+# Local stack secrets; deploy/.env.example is the committed template
+deploy/.env
+
+# Disposable TLS test keys and certificates
+deploy/tls-test/certs/
+
+# Build output: `make build` writes bin/, `make clean` removes it and the local DB.
+# Anchored so cmd/proxy and cmd/api are not matched.
+bin/
+/proxy
+/api
+lustre.db
+lustre.db-shm
+lustre.db-wal
+*.test
+*.out

@@ -1,0 +1,26 @@
+{
+  "connections": [
+    { "conn_id": "c-8f3a", "db_user": "analyst_bob", "client_addr": "10.0.0.5:51524",
+      "proxy_port": 3307, "upstream": "db-a", "upstream_addr": "demo-mysql:3306",
+      "auth_result": "ok", "ts_connect": "2026-08-04T09:00:00Z",
+      "ts_disconnect": "2026-08-04T09:03:00Z", "statement_count": 2 },
+    { "conn_id": "c-1b2c", "db_user": "reporting", "client_addr": "10.0.0.8:44112",
+      "proxy_port": 3307, "upstream": "db-b", "upstream_addr": "demo-mysql-b:3306",
+      "auth_result": "ok", "ts_connect": "2026-08-04T09:02:00Z",
+      "ts_disconnect": null, "statement_count": 2 },
+    { "conn_id": "c-9d4e", "db_user": "admin", "client_addr": "10.0.0.2:60233",
+      "proxy_port": 3308, "upstream": "db-a", "upstream_addr": "demo-mysql:3306",
+      "auth_result": "ok", "ts_connect": "2026-08-04T09:05:00Z",
+      "ts_disconnect": null, "statement_count": 1 },
+    { "conn_id": "c-3f7a", "db_user": "guest", "client_addr": "10.0.0.9:51999",
+      "proxy_port": 3307, "upstream": "db-a", "upstream_addr": "demo-mysql:3306",
+      "auth_result": "fail", "ts_connect": "2026-08-04T09:06:00Z",
+      "ts_disconnect": null, "statement_count": 0 },
+    { "conn_id": "c-7f9d", "db_user": "alice", "client_addr": "10.0.0.9:51999",
+      "proxy_port": 3307, "upstream": "db-a", "upstream_addr": "demo-mysql:3306",
+      "auth_result": "fail",
+      "auth_fail_reason": "ERROR 1045 (28000): Access denied for user 'alice'",
+      "ts_connect": "2026-08-04T09:06:00Z", "ts_disconnect": null, "statement_count": 0 }
+  ],
+  "total": 5
+}

@@ -1,0 +1,22 @@
+.git
+.gitignore
+.claude
+bin/
+/proxy
+/api
+main
+*.db
+*.sqlite
+docs/
+deploy/README.md
+
+# Generated disposable test private keys must not enter production builds.
+deploy/tls-test/certs/
+
+# Not part of the served UI: the edge image copies web/ wholesale, and these
+# would otherwise be reachable by URL. (USE_LIVE_API is fixed true, so the
+# mock data is never fetched.)
+web/README.md
+web/mock-*.json
+web/*.test.mjs
+**/.DS_Store

@@ -1,0 +1,1214 @@
+/* Lustre back office. All styling lives here: the edge CSP forbids inline
+   styles, so nothing may be set with a style attribute or a <style> block. */
+
+/* Self-hosted so the CSP's default-src 'self' covers font-src. Both files are
+   variable fonts, so one file carries every weight we use. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("fonts/inter-variable-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url("fonts/jetbrains-mono-variable-latin.woff2") format("woff2");
+}
+
+:root {
+  /* surfaces */
+  --page: #f4f7fa;
+  --panel: #ffffff;
+  --panel-alt: #f8fafc;
+  --line: #dfe6ee;
+  --line-strong: #c9d5e1;
+  --line-faint: #edf1f5;
+
+  /* text */
+  --ink: #12263b;
+  --body: #34414f;
+  --muted: #5e6e80;
+  --faint: #8a98a8;
+
+  /* brand and interaction */
+  --accent: #326fb0;
+  --accent-dark: #214a75;
+  --accent-soft: #eaf1f8;
+  --focus: #9dc0e6;
+  --orange: #f29237;
+
+  /* status */
+  --ok-ink: #067647;
+  --ok-bg: #ecfdf3;
+  --ok-dot: #12b76a;
+  --bad-ink: #b42318;
+  --bad-bg: #fef3f2;
+  --bad-line: #f4c7c3;
+  --warn-ink: #8a4307;
+  --warn-bg: #fff4e0;
+  --warn-line: #f5d9b5;
+
+  /* shape */
+  --r-control: 8px;
+  --r-panel: 12px;
+  --r-pill: 999px;
+  --shell: 1360px;
+
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--body);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+h1, h2, h3 { color: var(--ink); font-family: var(--sans); }
+
+a { color: var(--accent); }
+a:hover { color: var(--accent-dark); }
+
+/* One visible focus treatment everywhere, per the accessibility criteria. */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 1px;
+}
+
+/* ---------- top bar ---------- */
+
+header.topbar {
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+.topbar-inner {
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: 0 32px;
+  min-height: 64px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 28px;
+}
+
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand-mark { display: inline-flex; flex: none; }
+.brand-mark img { height: 26px; width: auto; display: block; }
+.brand-rule { width: 1px; height: 24px; background: var(--line); }
+.brand-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.brand-sub { color: var(--muted); font-size: 13px; }
+
+.topbar-end {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Proxy config state, mirrored from the Servers screen so it is visible on
+   every tab. Hidden until the first poll answers. */
+.proxy-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+}
+.proxy-pill .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+.proxy-pill.live { background: var(--ok-bg); color: var(--ok-ink); }
+.proxy-pill.live .dot { background: var(--ok-dot); }
+.proxy-pill.pending { background: var(--warn-bg); color: var(--warn-ink); }
+.proxy-pill.stale { background: var(--bad-bg); color: var(--bad-ink); }
+
+.whoami {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  font-weight: 500;
+}
+.whoami .avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex: none;
+}
+
+.logout-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-control);
+  background: var(--panel);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--body);
+  cursor: pointer;
+}
+.logout-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-dark);
+}
+
+/* ---------- nav ---------- */
+
+nav.mainnav {
+  display: flex;
+  gap: 4px;
+  align-self: stretch;
+}
+nav.mainnav button {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--muted);
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+}
+nav.mainnav button:hover { color: var(--ink); }
+nav.mainnav button.active {
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom-color: var(--orange);
+}
+
+/* ---------- page shell ---------- */
+
+main {
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: 28px 32px 48px;
+}
+
+.page-head { margin-bottom: 20px; }
+.page-head h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.page-head p { margin: 4px 0 0; color: var(--muted); }
+
+h2 { font-size: 17px; margin: 24px 0 8px; font-weight: 700; }
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+.section-head h2 { margin: 0; }
+.live-status { display: flex; align-items: center; gap: 12px; }
+
+.count { color: var(--muted); font-size: 13px; }
+.clickable { cursor: pointer; }
+
+/* ---------- buttons ---------- */
+
+.btn,
+button.clear,
+button.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  color: var(--body);
+  border-radius: var(--r-control);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+.btn:hover,
+button.clear:hover,
+button.live:hover { background: var(--accent-soft); }
+
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+.btn.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+
+.btn.danger { color: var(--bad-ink); border-color: var(--bad-line); }
+.btn.danger:hover { background: var(--bad-bg); }
+
+.btn:disabled,
+button.clear:disabled {
+  background: var(--panel-alt);
+  border-color: var(--line);
+  color: #a3afbc;
+  cursor: default;
+}
+
+button.live.on {
+  border-color: #a6e0c0;
+  color: var(--ok-ink);
+  font-weight: 600;
+}
+
+.row-actions button {
+  margin-right: 6px;
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+
+#add-server-btn, #add-admin-btn { margin-bottom: 16px; }
+
+/* ---------- filters and forms ---------- */
+
+.filters,
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.filters {
+  margin: 0 0 16px;
+  padding: 16px 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+}
+.controls { margin: 0 0 12px; }
+
+.filters label,
+.controls label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.filters input,
+.controls input,
+.controls select,
+.filters select {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-control);
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+}
+input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  min-height: 0;
+  accent-color: var(--accent);
+}
+
+#view-servers form,
+#view-admins form {
+  max-width: 480px;
+  margin: 16px 0;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--panel);
+}
+#view-servers .field label,
+#view-admins .field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 14px 0 6px;
+}
+#view-servers .field input[type="text"],
+#view-servers .field input[type="number"],
+#view-servers .field input[type="password"],
+#view-admins .field input[type="text"],
+#view-admins .field input[type="password"] {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-control);
+  font: inherit;
+  color: var(--ink);
+}
+#view-servers .form-actions,
+#view-admins .form-actions {
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+}
+#server-error,
+#admin-error {
+  color: var(--bad-ink);
+  font-size: 13px;
+  margin-top: 8px;
+  min-height: 1rem;
+}
+
+/* ---------- tables ---------- */
+
+/* Tables scroll inside their own box rather than widening the page. */
+.table-wrap {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  overflow: hidden;
+}
+.table-scroll { overflow-x: auto; }
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13.5px;
+}
+#view-audit table,
+#view-servers table { min-width: 960px; }
+
+th, td {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid var(--line-faint);
+  vertical-align: top;
+}
+th:first-child, td:first-child { padding-left: 18px; }
+th:last-child, td:last-child { padding-right: 18px; }
+
+thead th {
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--line);
+  padding-top: 10px;
+  padding-bottom: 10px;
+  white-space: nowrap;
+}
+
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: #f2f6fb; }
+
+tbody tr.failed { background: #fffbfa; }
+tbody tr.failed:hover td { background: var(--bad-bg); }
+
+#conn-body tr { cursor: pointer; }
+#conn-body tr.selected td { background: var(--accent-soft); }
+
+td.time {
+  white-space: nowrap;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+td.conn, td.sql { font-family: var(--mono); font-size: 12.5px; }
+td.conn { color: var(--accent); }
+td.sql { cursor: pointer; max-width: 48rem; color: var(--ink); }
+
+.sql-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.sql-text.expanded { display: block; white-space: pre-wrap; }
+
+.err-text {
+  display: block;
+  margin-top: 6px;
+  color: var(--bad-ink);
+  font-size: 12.5px;
+  font-family: var(--mono);
+}
+
+/* ---------- badges ---------- */
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* Reads are quiet, writes are warm, schema and privilege changes are outlined
+   so they stand out at a glance. */
+.badge.SELECT, .badge.SHOW, .badge.OTHER { background: #eef2f6; color: var(--body); }
+.badge.INSERT, .badge.UPDATE, .badge.DELETE { background: var(--warn-bg); color: var(--warn-ink); }
+.badge.CREATE, .badge.DROP, .badge.ALTER, .badge.TRUNCATE,
+.badge.GRANT, .badge.REVOKE {
+  background: var(--panel);
+  color: var(--bad-ink);
+  border: 1px solid #f04438;
+  font-weight: 700;
+  padding: 1px 7px;
+}
+
+.badge.ok, .badge.yes { background: var(--ok-bg); color: var(--ok-ink); font-size: 12px; }
+.badge.fail, .badge.no { background: var(--bad-bg); color: var(--bad-ink); font-size: 12px; }
+
+/* ---------- pager ---------- */
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  font-size: 13px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.pager button {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  color: var(--body);
+  border-radius: var(--r-control);
+  font: inherit;
+  cursor: pointer;
+}
+.pager button:hover { background: var(--accent-soft); }
+.pager button:disabled {
+  background: var(--panel-alt);
+  border-color: var(--line);
+  color: #a3afbc;
+  cursor: default;
+}
+
+/* ---------- sign-in ---------- */
+
+#login-view {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 48px 16px;
+}
+#login-view[hidden] { display: none; }
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(18, 38, 59, 0.06);
+  padding: 36px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.login-head { display: flex; flex-direction: column; gap: 18px; }
+.login-head img { height: 30px; width: auto; align-self: flex-start; }
+.login-head h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.login-head p { margin: 4px 0 0; color: var(--muted); }
+
+#login-form { display: flex; flex-direction: column; gap: 16px; }
+.login-field { display: flex; flex-direction: column; gap: 6px; }
+#login-view label {
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 13px;
+}
+#login-view input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  font: inherit;
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-control);
+}
+#login-submit {
+  min-height: 44px;
+  margin-top: 4px;
+  border: 0;
+  border-radius: var(--r-control);
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+#login-submit:hover { background: var(--accent-dark); }
+.login-foot {
+  margin: 0;
+  max-width: 400px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+/* Three sign-in outcomes read differently: a wrong password is an error, a
+   lockout is a warning worth explaining, an expired session is just news. */
+.alert {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--r-control);
+  font-size: 13.5px;
+}
+.alert:empty { display: none; }
+.alert.error { background: var(--bad-bg); color: var(--bad-ink); }
+.alert.warn { background: #fff6e5; color: var(--warn-ink); }
+.alert.info { background: var(--accent-soft); color: var(--accent-dark); }
+
+/* ---------- dialogs ---------- */
+
+/* Used by the server and admin confirmations in place of window.confirm. */
+dialog {
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  padding: 0;
+  max-width: 440px;
+  width: calc(100% - 32px);
+  color: var(--body);
+  background: var(--panel);
+  box-shadow: 0 24px 48px rgba(18, 38, 59, 0.18);
+}
+dialog::backdrop { background: rgba(18, 38, 59, 0.32); }
+.dialog-body { padding: 20px 24px; }
+.dialog-body h2 { margin: 0 0 8px; font-size: 18px; }
+.dialog-body p { margin: 0; color: var(--muted); }
+.dialog-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 14px 24px;
+  border-top: 1px solid var(--line);
+}
+
+/* ---------- narrow widths ---------- */
+
+@media (max-width: 720px) {
+  .topbar-inner { padding: 8px 16px; }
+  main { padding: 20px 16px 40px; }
+  .page-head h1 { font-size: 22px; }
+  .topbar-end { gap: 10px; }
+  .brand-sub { display: none; }
+}
+
+/* ---------- Activity: panel, filter bar, tabs (#84 item 2) ---------- */
+
+/* Read by a screen reader, not shown: these inputs carry their label visually
+   in the placeholder. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.page-head-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.page-head-row .page-head { margin-bottom: 0; }
+.page-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  overflow: hidden;
+}
+
+.filterbar {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.filter-row label { font-size: 13px; color: var(--muted); }
+
+/* The search takes whatever room is left; the rest keep a usable minimum. */
+.searchbox {
+  flex: 999 1 280px;
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-control);
+  background: var(--panel);
+}
+.searchbox input {
+  border: 0;
+  outline: 0;
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  min-height: 40px;
+  padding: 0;
+}
+.field-inline { flex: 1 1 150px; display: flex; }
+.field-inline input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-control);
+  font: inherit;
+  color: var(--ink);
+  background: var(--panel);
+}
+
+.segmented {
+  display: inline-flex;
+  flex: none;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-control);
+  overflow: hidden;
+}
+.segmented button {
+  border: 0;
+  border-left: 1px solid var(--line-strong);
+  background: var(--panel);
+  color: var(--body);
+  font: inherit;
+  font-size: 13px;
+  min-height: 40px;
+  padding: 0 12px;
+  cursor: pointer;
+}
+.segmented button:first-child { border-left: 0; }
+.segmented button:hover { background: var(--accent-soft); }
+.segmented button[aria-pressed="true"] {
+  background: var(--accent-dark);
+  border-left-color: var(--accent-dark);
+  color: #fff;
+  font-weight: 600;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.chips:empty { display: none; }
+.chips .chips-label { font-size: 13px; color: var(--muted); }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-size: 13px;
+  font-weight: 500;
+}
+.chip button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1;
+}
+.chip button:hover { background: #d7e4f2; }
+.chip.warn { background: var(--bad-bg); color: var(--bad-ink); }
+.chip.warn button:hover { background: #fadcd9; }
+.chips .clear-all {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 6px 4px;
+}
+.chips .clear-all:hover { color: var(--accent-dark); text-decoration: underline; }
+
+.tabrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--line);
+}
+.tabs { display: flex; gap: 4px; }
+.tab {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  padding: 14px 6px 11px;
+  margin-right: 14px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  color: var(--muted);
+  font-weight: 500;
+  border-bottom: 3px solid transparent;
+}
+.tab:hover { color: var(--ink); }
+.tab.active {
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom-color: var(--accent);
+}
+.tabcount { font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.tabopts {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+.opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--body);
+}
+
+.pane-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 18px 8px;
+}
+.pane-foot .pager { padding: 8px 0; }
+
+/* Risk tiers, from stmtkind.js: reads and anything uncategorised stay quiet,
+   writes are warm, schema and privilege changes are outlined. */
+.badge.kind-read,
+.badge.kind-other { background: #eef2f6; color: var(--body); }
+.badge.kind-write { background: var(--warn-bg); color: var(--warn-ink); }
+.badge.kind-schema {
+  background: var(--panel);
+  color: var(--bad-ink);
+  border: 1px solid #f04438;
+  padding: 1px 7px;
+  font-weight: 700;
+}
+
+td.sql .err-text {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--bad-ink);
+}
+
+td.schema { color: var(--muted); white-space: nowrap; }
+
+@media (max-width: 720px) {
+  .filterbar { padding: 12px; }
+  .tabrow { padding: 0 12px; }
+  .pane-foot { padding: 4px 12px 8px; }
+  .segmented { width: 100%; }
+  .segmented button { flex: 1; padding: 0 6px; }
+}
+
+/* ---------- Session drawer (#84 item 3) ---------- */
+
+/* A slide-over rather than a centred box: it is a detail view of the row you
+   clicked, not a decision to make. */
+dialog.drawer {
+  max-width: none;
+  width: min(560px, 100%);
+  height: 100%;
+  max-height: 100%;
+  margin: 0 0 0 auto;
+  border-radius: 0;
+  border-left: 1px solid var(--line);
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -12px 0 40px rgba(18, 38, 59, 0.18);
+}
+
+.drawer-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.drawer-head h2 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.drawer-sub {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.drawer-close {
+  margin-left: auto;
+  flex: none;
+  width: 40px;
+  padding: 0;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+.drawer-foot {
+  padding: 14px 24px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.drawer-meta {
+  margin: 0 0 22px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 20px;
+}
+.drawer-meta dt { font-size: 12px; color: var(--muted); }
+.drawer-meta dd {
+  margin: 2px 0 0;
+  color: var(--ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.drawer-section { margin: 0 0 10px; font-size: 14px; }
+
+.timeline { list-style: none; margin: 0; padding: 0; }
+.timeline li {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line-faint);
+}
+.timeline-time {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  font-size: 12.5px;
+  padding-top: 2px;
+}
+.timeline li > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.timeline code {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.timeline-db { font-size: 12px; color: var(--faint); }
+
+/* A button that reads as a link, for the connection id in the statements
+   table. A real link would need an href this page has no use for. */
+.linkish {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.linkish:hover { color: var(--accent-dark); }
+
+.newrows {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 18px;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-size: 13px;
+  border-bottom: 1px solid #d3e1f0;
+}
+.newrows button {
+  min-height: 32px;
+  padding: 0 12px;
+  border-color: #9db7d5;
+  color: var(--accent-dark);
+  font-weight: 600;
+}
+
+/* ---------- Servers: banner, cards, side panel (#84 item 4) ---------- */
+
+.config-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+  margin-bottom: 20px;
+  padding: 12px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--panel);
+}
+.config-banner .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex: none;
+}
+.config-banner.live { border-color: #a6e0c0; }
+.config-banner.live .dot { background: var(--ok-dot); }
+.config-banner.pending { border-color: var(--warn-line); }
+.config-banner.pending .dot { background: #f29237; }
+.config-banner.stale,
+.config-banner.unknown { border-color: var(--bad-line); }
+.config-banner.stale .dot,
+.config-banner.unknown .dot { background: #f04438; }
+
+.banner-item { display: inline-flex; align-items: baseline; gap: 8px; }
+.banner-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.banner-value { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* The list and the add/edit panel sit side by side; the panel takes no room
+   until something opens it. */
+.servers-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.server-cards {
+  flex: 1 1 520px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  align-content: start;
+}
+#server-form-container { flex: 0 1 380px; }
+#server-form-container:empty { display: none; }
+#view-servers form { margin-top: 0; max-width: none; width: 100%; }
+
+.list-msg { color: var(--muted); margin: 0; }
+
+.server-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.server-card.off { background: var(--panel-alt); }
+
+.server-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.server-head h2 { margin: 0; font-size: 17px; font-weight: 700; }
+
+.tag.on { background: var(--ok-bg); color: var(--ok-ink); }
+
+/* The route, drawn as one: what a client dials, and where it comes out. */
+.route {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: var(--r-control);
+  background: var(--panel-alt);
+  flex-wrap: wrap;
+}
+.route-end { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.route-label { font-size: 12px; color: var(--muted); }
+.route-value {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.route-arrow { color: var(--faint); font-size: 18px; }
+
+.server-meta {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  font-size: 13px;
+}
+.server-meta dt { color: var(--muted); }
+.server-meta dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+
+#view-servers .field select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-control);
+  font: inherit;
+  color: var(--ink);
+  background: var(--panel);
+}
+#view-servers .field input.bad { border-color: #f04438; }
+.field-warning {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  color: var(--warn-ink);
+  background: var(--warn-bg);
+  padding: 8px 10px;
+  border-radius: var(--r-control);
+}
+
+/* ---------- Admins: tags, dialog fields, history (#84 item 5) ---------- */
+
+.admin-name { font-weight: 600; color: var(--ink); }
+
+.tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  font-size: 11.5px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+.tag.you { background: var(--accent-soft); color: var(--accent-dark); }
+.tag.off { background: var(--bad-bg); color: var(--bad-ink); }
+
+/* Empty and error rows, which used to set padding from JavaScript. */
+.table-msg { padding: 14px 18px; color: var(--muted); }
+
+.form-title { margin-top: 0; font-size: 15px; }
+
+/* Dialogs are appended to <body>, so they sit outside the #view-admins and
+   #view-servers scopes that style the inline forms. */
+.dialog-body .field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 16px 0 6px;
+}
+.dialog-body .field input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-control);
+  font: inherit;
+  color: var(--ink);
+}
+.dialog-error {
+  color: var(--bad-ink);
+  font-size: 13px;
+  margin-top: 8px;
+  min-height: 1rem;
+}
+
+.time.muted { color: var(--faint); }

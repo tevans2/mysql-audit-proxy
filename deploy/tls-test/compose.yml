@@ -1,0 +1,32 @@
+# Isolated from the normal development stack: no fixed container names or volumes.
+name: lustre-tls-test
+x-mysql: &mysql
+  image: mysql:8.0
+  environment:
+    MYSQL_ROOT_PASSWORD: ${TLS_TEST_PASSWORD:?set TLS_TEST_PASSWORD for this disposable test stack}
+    MYSQL_ROOT_HOST: "%"
+    MYSQL_DATABASE: demo
+    MYSQL_USER: demo
+    MYSQL_PASSWORD: ${TLS_TEST_PASSWORD:?set TLS_TEST_PASSWORD}
+  # Use the local socket: the negative fixture intentionally cannot authenticate
+  # caching_sha2_password over a TLS TCP connection.
+  healthcheck:
+    test: ["CMD-SHELL", "mysqladmin ping -uroot -p\"$$MYSQL_ROOT_PASSWORD\""]
+    interval: 2s
+    timeout: 3s
+    retries: 60
+services:
+  db-a:
+    <<: *mysql
+    command: ["--ssl-ca=/certs/ca.pem", "--ssl-cert=/certs/db-a.pem", "--ssl-key=/certs/db-a-key.pem"]
+    ports: ["127.0.0.1:23306:3306"]
+    volumes: ["./certs:/certs:ro"]
+  db-b:
+    <<: *mysql
+    command: ["--ssl-ca=/certs/ca.pem", "--ssl-cert=/certs/db-b.pem", "--ssl-key=/certs/db-b-key.pem"]
+    ports: ["127.0.0.1:23316:3306"]
+    volumes: ["./certs:/certs:ro"]
+  tls-disabled:
+    <<: *mysql
+    command: ["--skip-ssl"]
+    ports: ["127.0.0.1:23326:3306"]

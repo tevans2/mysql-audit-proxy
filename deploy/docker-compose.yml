@@ -1,0 +1,238 @@
+# The whole stack: two upstream MySQL servers, the auditing proxy, the
+# back-office API, and a mysql client container to drive it.
+#
+# Build context is the repo root, so the Dockerfile can see go.mod and cmd/.
+#
+# Two upstreams because the spec has the proxy fronting several databases,
+# routed by listening port. upstreams.json seeds the API's servers table on
+# first boot; from then on the API is the single source of truth for the
+# mapping, and the proxy polls it live — db-a on 3307, db-b on 3308, per
+# whatever the API currently has. See deploy/README.md.
+#
+# Every password, key and token comes from deploy/.env (gitignored), which
+# Compose reads automatically because it sits next to this file. `make up`
+# creates it from .env.example on a clean checkout; deploy/README.md covers
+# generating real values. Each reference uses ${VAR:?...}, so a missing value
+# stops Compose with an error instead of starting a service with a blank
+# secret.
+
+services:
+  # db-a keeps the Sprint 1 identity: port 3306, root/rootpass, and the 'demo'
+  # database and user — .env.example's values. internal/proxy/runtime's integration tests
+  # default to exactly that, so changing them in deploy/.env means pointing
+  # the tests at the new values too (PROXY_TEST_UPSTREAM_PASS, E2E_DB_A_PASS).
+  db-a:
+    image: mysql:8.0
+    container_name: proxy-upstream-db-a
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_A_ROOT_PASSWORD:?set in deploy/.env — see deploy/README.md}
+      MYSQL_DATABASE: demo
+      MYSQL_USER: demo
+      MYSQL_PASSWORD: ${DB_A_APP_PASSWORD:?set in deploy/.env — see deploy/README.md}
+      # Read by initdb/db-a/03-users.sh, which creates alice and the bootstrap
+      # account. The SQL files carry no passwords, so these are the only source.
+      ALICE_PASSWORD: ${DB_A_ALICE_PASSWORD:?set in deploy/.env — see deploy/README.md}
+      BOOTSTRAP_PASSWORD: ${DB_A_BOOTSTRAP_PASSWORD:?set in deploy/.env — see deploy/README.md}
+    # Seeds the 'sales' schema and the routing marker alongside 'demo'.
+    volumes:
+      - ./initdb/db-a:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "3306:3306"
+    networks:
+      default:
+        aliases:
+          # This service was called 'db' through Sprint 1. The alias keeps
+          # 'db:3306' resolving for branches written before the rename.
+          - db
+    healthcheck:
+      # The container's own MYSQL_ROOT_PASSWORD ($$ defers expansion to the
+      # container shell), so the password lives in one place.
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # db-b is deliberately unlike db-a: different schema, different application
+  # user, different root password. A listener pointed at the wrong upstream, or
+  # carrying the wrong credentials, fails visibly instead of connecting anyway.
+  db-b:
+    image: mysql:8.0
+    container_name: proxy-upstream-db-b
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_B_ROOT_PASSWORD:?set in deploy/.env — see deploy/README.md}
+      MYSQL_DATABASE: hr
+      MYSQL_USER: hr_app
+      MYSQL_PASSWORD: ${DB_B_APP_PASSWORD:?set in deploy/.env — see deploy/README.md}
+      # Read by initdb/db-b/03-users.sh, which creates bob and the bootstrap account.
+      BOB_PASSWORD: ${DB_B_BOB_PASSWORD:?set in deploy/.env — see deploy/README.md}
+      BOOTSTRAP_PASSWORD: ${DB_B_BOOTSTRAP_PASSWORD:?set in deploy/.env — see deploy/README.md}
+    volumes:
+      - ./initdb/db-b:/docker-entrypoint-initdb.d:ro
+    # 3307 is the proxy's listening port and 3308 is the obvious second one, so
+    # db-b is published on 3316 to keep the upstream and downstream ranges apart.
+    ports:
+      - "3316:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      args:
+        CMD: api
+    container_name: lustre-api
+    environment:
+      API_LISTEN_ADDR: ":8080"
+      # On the volume, so the audit log survives a rebuild.
+      API_DB_PATH: /data/lustre.db
+      # First-boot seed for the servers table, applied only when the table is
+      # empty (a fresh api-data volume). After that the database is the source
+      # of truth: edits made through /api/servers survive restarts, and changing
+      # this file has no effect until the volume is wiped (`down -v`).
+      API_CONFIG_PATH: /etc/lustre/upstreams.json
+      # Upstream passwords for the seeded rows, keyed by the file's "name". The
+      # file holds none, and the proxy's API mode refuses a server with no
+      # password. These are the bootstrap accounts' passwords, the same variables
+      # deploy/initdb/*/03-users.sh creates those accounts with, so a custom
+      # password in deploy/.env reaches both and the two cannot drift. The proxy
+      # logs in as that account and never as root. No comma in either value: this is a
+      # comma-separated name:password list. Only applied on first boot, when the
+      # servers table is empty — rows already in the api-data volume keep
+      # whatever password they were seeded with, see "Secrets" in deploy/README.md.
+      API_UPSTREAM_PASSWORDS: "db-a:${DB_A_BOOTSTRAP_PASSWORD:?set in deploy/.env — see deploy/README.md},db-b:${DB_B_BOOTSTRAP_PASSWORD:?set in deploy/.env — see deploy/README.md}"
+      # bcrypt hash of the admin password for the API login endpoint.
+      API_ADMIN_PASS_HASH: ${API_ADMIN_PASS_HASH:?set in deploy/.env — see deploy/README.md}
+      # AES-256 key for the upstream passwords stored in the servers table.
+      # Exactly 32 bytes, no default — the API refuses to start without it.
+      API_CONFIG_KEY: ${API_CONFIG_KEY:?set in deploy/.env — see deploy/README.md}
+      # Service token for GET /api/proxy/config, the only endpoint that serves
+      # decrypted upstream credentials. Distinct from the operator's login:
+      # an admin session reaches the sanitised back-office endpoints only.
+      # The proxy below presents the same value, from the same variable.
+      API_PROXY_TOKEN: ${API_PROXY_TOKEN:?set in deploy/.env — see deploy/README.md}
+      # Audit-log retention (ADR 0006). OFF by default: with 0 days nothing is
+      # ever deleted, because deletion cannot be undone and Acumen has not told
+      # us how long to keep records. We recommend 365 days with "delete"; set
+      # API_RETENTION_DAYS=365 in deploy/.env to turn that on. Try it first with
+      # API_RETENTION_DRY_RUN=true, which only logs what would be removed. The
+      # archive directory is only used when the action is "archive"; it is on
+      # the same volume as the database here, so point it at a separate volume
+      # for anything beyond a laptop.
+      API_RETENTION_DAYS: ${API_RETENTION_DAYS:-0}
+      API_RETENTION_ACTION: ${API_RETENTION_ACTION:-delete}
+      API_RETENTION_ARCHIVE_DIR: ${API_RETENTION_ARCHIVE_DIR:-/data/archive}
+      API_RETENTION_INTERVAL: ${API_RETENTION_INTERVAL:-1h}
+      API_RETENTION_DRY_RUN: ${API_RETENTION_DRY_RUN:-false}
+    # No published port: the browser reaches the API through the edge below,
+    # and the proxy reaches it as api:8080 on the compose network.
+    volumes:
+      - api-data:/data
+      - ./upstreams.json:/etc/lustre/upstreams.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # One proxy process, one listener per server the API currently knows about —
+  # db-a on 3307, db-b on 3308. The API's servers table (seeded from
+  # upstreams.json on first boot, see the api service above) is the single
+  # source of truth for that mapping; the proxy polls it live, so there is
+  # nothing here to keep in step with it by hand.
+  proxy:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      args:
+        CMD: proxy
+    container_name: lustre-proxy
+    depends_on:
+      db-a:
+        condition: service_healthy
+      db-b:
+        condition: service_healthy
+      api:
+        condition: service_started
+    environment:
+      # Live configuration from the back-office API. This is now the proxy's
+      # only source of upstream config — which servers it fronts, on which
+      # ports, and their upstream passwords all come from here, not from
+      # upstreams.json (that file only seeds the API's own servers table on
+      # first boot — see the api service above).
+      API_URL: http://api:8080
+      API_PROXY_TOKEN: ${API_PROXY_TOKEN:?set in deploy/.env — see deploy/README.md}
+      # There is no list of client logins here any more. The proxy opens each
+      # session as the upstream's bootstrap account (USAGE only), asks the
+      # database to switch it to the client's own user, and relays the
+      # database's challenge to the client. The database decides who may
+      # connect and what they may touch; the proxy only records it. Setting
+      # PROXY_USERS is now a fatal startup error.
+      # Where audit events are posted. Unset it to log them instead, which is
+      # how the proxy runs without the back-office API.
+      SINK_INGEST_URL: http://api:8080/api/events
+      # Health and audit metrics. Reachable on the compose network only: the
+      # port is deliberately not published, and the edge does not route it.
+      PROXY_ADMIN_ADDR: ":9100"
+    healthcheck:
+      # Ready only once the first configuration is applied and every listener
+      # is bound, so the generous start_period covers a slow first fetch.
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9100/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 6
+      start_period: 40s
+    networks:
+      default:
+        aliases:
+          # This service was called 'proxy' before it grew a listener per
+          # upstream too, and 'proxy-a'/'proxy-b' while getting there — the
+          # aliases keep both older forms of 'mysql -h ...' working.
+          - proxy-a
+          - proxy-b
+    ports:
+      - "3307:3307"
+      - "3308:3308"
+
+  # Serves the UI (../web) and forwards the browser's API calls to the api
+  # service, all from one origin over TLS. See deploy/Caddyfile for which paths
+  # are forwarded and why /api/events is not one of them.
+  edge:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.edge
+    container_name: lustre-edge
+    depends_on:
+      - api
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Issued certificates and Caddy's local CA, so a restart does not re-issue.
+      - caddy-data:/data
+      - caddy-config:/config
+
+  client:
+    image: mysql:8.0
+    container_name: proxy-downstream-client
+    depends_on:
+      db-a:
+        condition: service_healthy
+      db-b:
+        condition: service_healthy
+    entrypoint: ["tail", "-f", "/dev/null"]
+
+volumes:
+  api-data:
+  caddy-data:
+  caddy-config:
+
+networks:
+  default:
+  

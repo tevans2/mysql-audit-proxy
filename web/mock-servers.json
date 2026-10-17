@@ -1,0 +1,22 @@
+{
+  "servers": [
+    {
+      "id": 1,
+      "name": "db-a",
+      "listen_port": 3307,
+      "upstream_host": "db-a",
+      "upstream_port": 3306,
+      "upstream_user": "root",
+      "enabled": true
+    },
+    {
+      "id": 2,
+      "name": "db-b",
+      "listen_port": 3308,
+      "upstream_host": "db-b",
+      "upstream_port": 3306,
+      "upstream_user": "root",
+      "enabled": true
+    }
+  ]
+}

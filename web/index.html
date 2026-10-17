@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acumen · Database audit</title>
+  <link rel="preload" href="fonts/inter-variable-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- LOGIN VIEW -->
+  <section id="login-view" hidden>
+    <main class="login-card">
+      <div class="login-head">
+        <img src="acumen-logo.svg" alt="Acumen Software">
+        <div>
+          <h1>Sign in</h1>
+          <p>Database audit back office</p>
+        </div>
+      </div>
+      <div id="login-error" class="alert" role="alert"></div>
+      <form id="login-form">
+        <div class="login-field">
+          <label for="login-user">Username</label>
+          <input type="text" id="login-user" autocomplete="username">
+        </div>
+        <div class="login-field">
+          <label for="login-pass">Password</label>
+          <input type="password" id="login-pass" autocomplete="current-password">
+        </div>
+        <button type="submit" id="login-submit">Sign in</button>
+      </form>
+    </main>
+    <p class="login-foot">Every sign-in and change made here is recorded with your name.</p>
+  </section>
+
+  <!-- APP VIEW -->
+  <div id="app-view" hidden>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <span class="brand-mark"><img src="acumen-logo.svg" alt="Acumen Software"></span>
+          <span class="brand-rule" aria-hidden="true"></span>
+          <span class="brand-name">Database audit</span>
+        </div>
+
+        <nav class="mainnav" aria-label="Main">
+          <button class="active" data-view="audit">Activity</button>
+          <button data-view="servers" id="nav-servers">Servers</button>
+          <button data-view="admins" id="nav-admins">Admins</button>
+        </nav>
+
+        <div class="topbar-end">
+          <a class="proxy-pill" id="proxy-pill" href="#servers" hidden>
+            <span class="dot" aria-hidden="true"></span>
+            <span id="proxy-pill-text"></span>
+          </a>
+          <span class="whoami" id="whoami" hidden>
+            <span class="avatar" id="whoami-avatar" aria-hidden="true"></span>
+            <span id="whoami-name"></span>
+          </span>
+          <button class="logout-btn" id="logout-btn">Sign out</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="view-audit">
+        <div class="page-head-row">
+          <div class="page-head">
+            <h1>Activity</h1>
+            <p>Every login and statement that went through the proxy: who ran what, when, and where.</p>
+          </div>
+          <div class="page-actions">
+            <button class="live on" id="live-toggle">● Live</button>
+            <span class="count" id="updated"></span>
+            <button class="btn" id="copy-link">Copy link to this view</button>
+          </div>
+        </div>
+
+        <section class="panel" aria-label="Audit log">
+          <div class="filterbar" id="filter-bar">
+            <div class="filter-row">
+              <label class="searchbox" for="filter-q" id="wrap-q">
+                <span class="sr-only">Search SQL text</span>
+                <input type="search" id="filter-q" placeholder="Search SQL text, e.g. orders or DROP TABLE">
+              </label>
+
+              <label class="field-inline">
+                <span class="sr-only">User</span>
+                <input type="text" id="filter-user" list="user-suggestions" placeholder="All users">
+              </label>
+              <datalist id="user-suggestions"></datalist>
+
+              <label class="field-inline" id="wrap-upstream" hidden>
+                <span class="sr-only">Server</span>
+                <input type="text" id="filter-upstream" list="upstream-suggestions" placeholder="All servers">
+              </label>
+              <datalist id="upstream-suggestions"></datalist>
+
+              <label class="field-inline" id="wrap-type">
+                <span class="sr-only">Statement type</span>
+                <input type="text" id="filter-type" list="type-suggestions" placeholder="Any type">
+              </label>
+              <datalist id="type-suggestions">
+                <option>SELECT</option><option>INSERT</option><option>UPDATE</option>
+                <option>DELETE</option><option>CREATE</option><option>DROP</option>
+                <option>ALTER</option><option>TRUNCATE</option><option>GRANT</option>
+                <option>REVOKE</option><option>SHOW</option><option>SET</option>
+                <option>BEGIN</option><option>COMMIT</option><option>ROLLBACK</option>
+                <option>USE</option><option>EXPLAIN</option>
+              </datalist>
+
+              <div class="segmented" role="group" aria-label="Time range" id="range-group">
+                <button type="button" data-range="1h" aria-pressed="false">1h</button>
+                <button type="button" data-range="24h" aria-pressed="false">24h</button>
+                <button type="button" data-range="7d" aria-pressed="false">7d</button>
+                <button type="button" data-range="30d" aria-pressed="false">30d</button>
+                <button type="button" data-range="custom" aria-pressed="false">Custom</button>
+              </div>
+            </div>
+
+            <div class="filter-row" id="custom-range" hidden>
+              <label for="filter-from">From</label>
+              <input type="datetime-local" id="filter-from">
+              <label for="filter-to">To</label>
+              <input type="datetime-local" id="filter-to">
+            </div>
+
+            <div class="chips" id="filter-chips"></div>
+          </div>
+
+          <div class="tabrow">
+            <div role="tablist" aria-label="Log" class="tabs">
+              <button role="tab" class="tab active" data-tab="statements" aria-selected="true" aria-controls="pane-statements">
+                Statements <span class="tabcount" id="tabcount-statements"></span>
+              </button>
+              <button role="tab" class="tab" data-tab="sessions" aria-selected="false" aria-controls="pane-sessions">
+                Sessions <span class="tabcount" id="tabcount-sessions"></span>
+              </button>
+            </div>
+            <div class="tabopts">
+              <span class="count" id="selected-conn"></span>
+              <label class="opt clickable" id="opt-handshake">
+                <input type="checkbox" id="hide-handshake" checked> Hide client handshake
+              </label>
+              <label class="opt clickable" id="opt-failed" hidden>
+                <input type="checkbox" id="failed-only"> Failed logins only
+              </label>
+            </div>
+          </div>
+
+          <div class="newrows" id="new-rows" hidden>
+            <span id="new-rows-text"></span>
+            <button class="btn" id="new-rows-show">Show them</button>
+          </div>
+
+          <div id="pane-statements" role="tabpanel">
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Time</th><th>Connection</th><th>User</th><th>Upstream</th>
+                    <th>Schema</th><th>Kind</th><th>Statement</th>
+                  </tr>
+                </thead>
+                <tbody id="stmt-body"></tbody>
+              </table>
+            </div>
+            <div class="pane-foot">
+              <span class="count" id="stmt-count"></span>
+              <div class="pager" id="stmt-pager"></div>
+            </div>
+          </div>
+
+          <div id="pane-sessions" role="tabpanel" hidden>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Connection</th><th>User</th><th>Client</th><th>Upstream</th>
+                    <th>Auth</th><th>Attempted</th><th>Disconnected</th><th>Statements</th>
+                  </tr>
+                </thead>
+                <tbody id="conn-body"></tbody>
+              </table>
+            </div>
+            <div class="pane-foot">
+              <span class="count" id="conn-count"></span>
+              <div class="pager" id="conn-pager"></div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section id="view-servers" hidden>
+        <div class="page-head">
+          <h1>Servers</h1>
+          <p>Port to upstream mappings the proxy serves.</p>
+        </div>
+
+        <p class="count" id="config-status"></p>
+        <button class="btn primary" id="add-server-btn">+ Add server</button>
+
+        <div class="servers-layout">
+          <div class="server-cards" id="servers-body"></div>
+          <div id="server-form-container"></div>
+        </div>
+      </section>
+
+      <section id="view-admins" hidden>
+        <div class="page-head">
+          <h1>Admins</h1>
+          <p>Who can sign in to the back office.</p>
+        </div>
+
+        <button class="btn primary" id="add-admin-btn">+ Add admin</button>
+
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr><th>Username</th><th>Created</th><th>Status</th><th></th></tr>
+              </thead>
+              <tbody id="admins-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="admin-form-container"></div>
+
+        <div class="section-head">
+          <h2>Recent changes</h2>
+          <span class="count">Admin and server changes, with who made them.</span>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr><th>When</th><th>Admin</th><th>Action</th><th>Target</th></tr>
+              </thead>
+              <tbody id="actions-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div><!-- /app-view -->
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
