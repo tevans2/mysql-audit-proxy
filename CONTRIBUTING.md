@@ -182,10 +182,10 @@ Trunk-based: a single stable trunk plus short-lived branches.
   `make test-e2e`).
 
 ### Tagging demos
-At each sprint demo we tag the commit so we always have a known-good point to return to:
+At each demo or release we tag the commit so we always have a known-good point to return to:
 ```bash
-git tag sprint-1-demo
-git push origin sprint-1-demo
+git tag demo-1
+git push origin demo-1
 ```
 
 ### Definition of Done
@@ -205,4 +205,3 @@ request, **CI is green**, and it **runs in `docker-compose`**.
 - **Reviewer**: a teammate who reads your pull request and approves or requests changes.
 - **CI (GitHub Actions)**: automated build and tests that run on every push and pull request.
 - **`main`**: the stable branch we demo from; protected, always working.
-- **Sprint**: a fixed work period ending in a demo to the client. We run three.

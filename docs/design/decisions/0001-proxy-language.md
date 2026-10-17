@@ -40,12 +40,12 @@ wire protocol rather than implementing it from scratch.
 **Positive:** best technical fit for a concurrent network proxy; strong library support; clean
 deployment; a defensible, well-evidenced choice.
 
-**Negative / risks:** nobody on the team knows Go yet → a learning curve during Sprint 1.
+**Negative / risks:** the team was new to Go → a learning curve at the start.
 
 **Mitigations:**
-- Joe's first proxy task is getting `go-mysql` to complete a handshake and read query text —
-  this also serves as the team's hands-on Go onboarding.
-- Mieke pairs on the proxy so the crux is not a single-person silo and two people climb the
+- The first proxy task is getting `go-mysql` to complete a handshake and read query text —
+  this also serves as hands-on Go onboarding.
+- Pair on the proxy so the crux is not a single-person silo and two people climb the
   curve together.
 - Manage goroutine lifecycles with `context`-based cancellation to avoid leaks (a known,
   documented pattern).

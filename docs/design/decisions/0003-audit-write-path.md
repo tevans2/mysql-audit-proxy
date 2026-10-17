@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted — 2026-08-01, implemented in Sprint 1.
+Accepted — 2026-08-01, implemented in the first version.
 
 ## Context
 

@@ -1,7 +1,7 @@
 package runtime
 
 // Manager is the reconciliation half of the live-config-reconciliation
-// ticket (docs/sprints) — see ../config/configclient.go for the polling half that
+// work — see ../config/configclient.go for the polling half that
 // feeds it snapshots, and Proxy.Run / session_test.go for the
 // cancellable-listener primitive a later chunk uses to actually carry out
 // a Plan against real listeners.

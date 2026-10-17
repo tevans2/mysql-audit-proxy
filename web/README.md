@@ -243,7 +243,6 @@ Two constants near the top of `api.js` control the source:
   `<dialog>` so Esc, the backdrop and focus are the browser's job
 - `views/sessiondrawer.js` - one session and everything that ran in it, in a
   slide-over; the only view that fetches on its own
-- `acumen-logo.svg` - the Acumen wordmark used in the header and on sign-in
 - `fonts/` - the two self-hosted variable fonts and their licences
 - `mock-connections.json` - sample connections in the API's documented shape
   (includes a rejected login)

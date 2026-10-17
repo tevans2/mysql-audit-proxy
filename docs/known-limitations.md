@@ -1,9 +1,9 @@
 # Known Limitations
 
 What the system does *not* do, and the traps in the code. Written down so nobody
-rediscovers them the hard way, and so we can answer the client honestly.
+rediscovers them the hard way.
 
-Current as of project close (16 Oct 2026, end of Sprint 3). Earlier versions of this file listed
+Current as of 16 Oct 2026. Earlier versions of this file listed
 prepared statements, `caching_sha2_password`, failed-login recording and back-office
 authentication as missing; all four have shipped and are no longer listed.
 
@@ -23,7 +23,7 @@ authentication as missing; all four have shipped and are no longer listed.
   their codes. Detail in [`cmd/proxy/README.md`](../cmd/proxy/README.md).
 - **Whole result sets are buffered in memory.** A very large `SELECT` costs proxy memory and
   latency before the client sees its first row. Streaming is the fix and is not built. Only
-  100-row results were measured ([perf baseline](perf/sprint-2-baseline.md)).
+  100-row results were measured ([perf baseline](perf/baseline.md)).
 
 ## Availability
 
@@ -42,7 +42,7 @@ authentication as missing; all four have shipped and are no longer listed.
 - **A full buffer blocks queries by default.** Above about 18,500 statements/second the sink
   stalls the query path rather than lose records
   ([ADR 0005](design/decisions/0005-audit-sink-blocks-by-default.md),
-  [measurements](perf/sprint-3-rerun.md)). `SINK_ON_FULL=drop` chooses the opposite trade. The
+  [measurements](perf/block-mode-rerun.md)). `SINK_ON_FULL=drop` chooses the opposite trade. The
   specified load (about 2,500/s) is far below either threshold.
 - **Delivery is still not durable.** Blocking closes the buffer-overflow path only. A batch the
   API keeps refusing is given up on after the sink's retries (about 15 s), counted in
@@ -54,10 +54,10 @@ authentication as missing; all four have shipped and are no longer listed.
   edit or delete rows undetectably. Hash-chaining was designed and not built.
 - **Raw SQL is stored, including literal values.** The audit log therefore holds whatever personal
   or sensitive data appears in queries, which makes it POPIA-relevant. The usual mitigation is a
-  normalised fingerprint for searching, with the raw text under tighter control. Acumen did not
+  normalised fingerprint for searching, with the raw text under tighter control. The client did not
   decide this.
 - **Retention is off by default.** Nothing is ever deleted unless `API_RETENTION_DAYS` is set,
-  so the database grows without bound (about 362 bytes per statement). Acumen did not give a
+  so the database grows without bound (about 362 bytes per statement). The client did not give a
   period; 365 days with deletion is recommended. See
   [ADR 0006](design/decisions/0006-audit-log-retention.md).
 - **The statement type is only the first keyword.** `SET`, `BEGIN`, `COMMIT`, `USE`, `WITH` and
@@ -140,7 +140,15 @@ authentication as missing; all four have shipped and are no longer listed.
 - **Config changes are not instant.** See the polling note above before debugging a "new server
   does not route" report.
 
-## Where these are tracked
+## Possible next work
 
-The project has closed, so these are not scheduled. The ones that matter most if it were
-continued are listed in [Sprint 3 — Outcomes and handover](sprints/sprint-3.md#handover).
+Not scheduled. In order of value:
+
+1. **Durable audit buffer.** Spool events to disk in the proxy so an API outage loses nothing.
+2. **Monitoring.** Scrape `/metrics`; alert on failed or dropped events and proxy health.
+3. **Tamper-evident records.** Hash-chain statement rows.
+4. **Masking or fingerprinting** literal values in stored SQL.
+5. **A configurable client-facing certificate**, so clients can verify the proxy.
+6. **Graceful shutdown** for the proxy (drain sessions and the audit buffer on SIGTERM).
+7. **Login rate limiting on the proxy.** Each attempt costs MySQL a TLS connection and login.
+8. **Streaming result sets** instead of buffering them.

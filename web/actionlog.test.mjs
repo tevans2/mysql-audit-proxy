@@ -8,19 +8,19 @@ test("admin actions read as sentences", () => {
     "admin added the admin maria",
   );
   assert.equal(
-    actionSentence({ username: "admin", action: "DISABLE_ADMIN", target: "mkotze" }),
-    "admin disabled the admin mkotze",
+    actionSentence({ username: "admin", action: "DISABLE_ADMIN", target: "dave" }),
+    "admin disabled the admin dave",
   );
 });
 
 test("changing your own password reads differently from changing someone else's", () => {
   assert.equal(
-    actionSentence({ username: "mkotze", action: "CHANGE_PASSWORD", target: "mkotze" }),
-    "mkotze changed their own password",
+    actionSentence({ username: "dave", action: "CHANGE_PASSWORD", target: "dave" }),
+    "dave changed their own password",
   );
   assert.equal(
-    actionSentence({ username: "mkotze", action: "CHANGE_PASSWORD", target: "admin" }),
-    "mkotze changed the password for admin",
+    actionSentence({ username: "dave", action: "CHANGE_PASSWORD", target: "admin" }),
+    "dave changed the password for admin",
   );
 });
 

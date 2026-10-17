@@ -17,9 +17,8 @@ This folder contains the local Docker setup for running and testing the system.
 
 ## The two upstreams
 
-The spec has the proxy fronting several databases, routed by listening port. Sprint 1
-ran one database to prove the pipeline; `db-b` exists so the multi-listener work has a
-second real server to route to.
+The proxy fronts several databases, routed by listening port. `db-a` alone proves the
+pipeline; `db-b` exists so multi-listener routing has a second real server to route to.
 
 They are deliberately unalike. A listener pointed at the wrong upstream, or carrying the
 wrong credentials, fails visibly instead of returning believable rows.
@@ -32,7 +31,7 @@ wrong credentials, fails visibly instead of returning believable rows.
 | Databases | `demo`, `sales`, `lustre_test` | `hr`, `lustre_test` |
 | Tables | `sales.customers`, `sales.orders` | `hr.departments`, `hr.employees` |
 
-These are the development values from `.env.example`. `db-a` keeps its Sprint 1 identity
+These are the development values from `.env.example`. `db-a` keeps its original identity
 exactly — port 3306, `root`/`rootpass`, and the `demo` database and user. `internal/proxy/runtime`'s
 integration tests default to that, so changing it in `.env` means pointing them at the new
 values too, or they fail or, worse, silently skip.
@@ -40,7 +39,7 @@ values too, or they fail or, worse, silently skip.
 The `sales_app` password is set by `initdb/db-a/02-sales.sql`, not `.env`: it is seed data
 for demo queries, not a credential anything in the stack uses.
 
-The service was called `db` through Sprint 1. It still answers to `db` on the compose
+The service used to be called `db`. It still answers to `db` on the compose
 network via an alias, so older branches keep working, but new work should say `db-a`.
 
 ### Telling them apart
@@ -322,8 +321,7 @@ which `upstream` they reached.
 
 The proxy offers `caching_sha2_password` — MySQL 8's own default authentication plugin since
 8.0.4 — so a current `mysql` client connects with no `--default-auth`, `--get-server-public-key`,
-or `allowPublicKeyRetrieval` override needed, the "MySQL 8 default authentication" item in
-[Sprint 2](../docs/sprints/sprint-2.md). It no longer matters that MySQL 9.x removed
+or `allowPublicKeyRetrieval` override needed, the "MySQL 8 default authentication" case. It no longer matters that MySQL 9.x removed
 `mysql_native_password` outright; a Homebrew MySQL 9 client that used to fail client-side before
 reaching the proxy at all now authenticates normally, and the `mysql:8.0` client container above
 connects the same way it always did. The client container remains available for testing

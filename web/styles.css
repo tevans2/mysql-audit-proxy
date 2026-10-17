@@ -106,9 +106,6 @@ header.topbar {
 }
 
 .brand { display: flex; align-items: center; gap: 14px; }
-.brand-mark { display: inline-flex; flex: none; }
-.brand-mark img { height: 26px; width: auto; display: block; }
-.brand-rule { width: 1px; height: 24px; background: var(--line); }
 .brand-name {
   font-weight: 700;
   font-size: 15px;
@@ -553,7 +550,6 @@ td.sql { cursor: pointer; max-width: 48rem; color: var(--ink); }
   gap: 24px;
 }
 .login-head { display: flex; flex-direction: column; gap: 18px; }
-.login-head img { height: 30px; width: auto; align-self: flex-start; }
 .login-head h1 {
   margin: 0;
   font-size: 22px;

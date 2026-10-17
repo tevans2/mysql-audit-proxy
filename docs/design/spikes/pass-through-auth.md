@@ -18,7 +18,7 @@ grants.
 
 ## What was asked
 
-At the Sprint 2 demo Michael Botha (CTO, Acumen) asked for the proxy to connect to the
+At a client demo the client's CTO asked for the proxy to connect to the
 database **as each individual user**, with per-user upstream connections, so that identity is
 *enforced* by MySQL and not merely recorded in the audit log.
 
@@ -251,7 +251,7 @@ Authentication requires secure connection.
 
 and full auth is every user's first login after a database restart. The certificate is also
 still what encrypts the client leg's SQL and result data, which is the security property
-demoed in Sprint 2, and go-mysql refuses to construct a `caching_sha2_password` server with
+demoed earlier, and go-mysql refuses to construct a `caching_sha2_password` server with
 neither a key nor a certificate.
 
 So: **one fewer key to manage, same certificate story.** go-mysql lifts an RSA key off the
@@ -322,7 +322,7 @@ the proxy relays the client's cleartext to an upstream that wants ciphertext, an
 re-encoding path implemented for `caching_sha2_password` was not also written for this plugin
 — the request byte differs (`0x01` rather than `0x02`) and the exchange is driven from the
 auth-switch response rather than from an AuthMoreData. **This is unimplemented, not
-impossible**; roughly 15 lines, and it is only worth writing if Acumen actually has
+impossible**; roughly 15 lines, and it is only worth writing if the client actually has
 `sha256_password` accounts, which is unlikely given it is not the default.
 
 **All of this asymmetry disappears with proxy-to-database TLS.** With both legs encrypted,
@@ -330,7 +330,7 @@ every row in that table becomes a pure relay: the client sends cleartext, the up
 cleartext, and the proxy forwards bytes it never interprets. The whole re-encoding path, the
 RSA handling and the `sha256_password` gap all delete themselves.
 
-**Recommendation, restated more strongly than before: schedule the Sprint 3 proxy-to-database
+**Recommendation, restated more strongly than before: schedule the proxy-to-database
 TLS item first.** It is not just a simplification, it is what makes pass-through genuinely
 password-blind.
 
@@ -344,7 +344,7 @@ ERROR 2059 (HY000): Authentication plugin 'mysql_native_password' cannot be load
 That is the same fact already recorded above `newHandshakeServer`. Native-password testing
 used the MySQL 8.0 client inside the db-a container. It matters for pass-through because the
 *account's* plugin now dictates what the client must support — today's proxy hides that, since
-it only ever speaks `caching_sha2_password` to the client. Any Acumen account still on
+it only ever speaks `caching_sha2_password` to the client. Any client account still on
 `mysql_native_password` will be unreachable from a MySQL 9 client once this ships. Worth
 raising with them.
 
@@ -378,10 +378,10 @@ uses `errors.As` and filters on `ER_ACCESS_DENIED_ERROR` / `ER_NO_SUCH_USER`; th
 |---|---|---|
 | Native password, production quality | **2–3 days** | Client leg is nearly free. Most of it is the upstream shim, its tests, and deleting `PROXY_USERS` and everything downstream of it. |
 | `caching_sha2` fast auth | **+0.5 day** | Already works; cost is tests and the auth-switch edge cases. |
-| `caching_sha2` full auth | **+0.5 day with upstream TLS, +2 without** | With TLS on both legs it is a pure relay and mostly deletes code. Do it after the Sprint 3 TLS item. |
-| `sha256_password` on a TLS client leg | **+0.5 day, or skip** | Only if Acumen has such accounts. Disappears entirely with upstream TLS. |
+| `caching_sha2` full auth | **+0.5 day with upstream TLS, +2 without** | With TLS on both legs it is a pure relay and mostly deletes code. Do it after the upstream TLS item. |
+| `sha256_password` on a TLS client leg | **+0.5 day, or skip** | Only if the client has such accounts. Disappears entirely with upstream TLS. |
 | Config / docs / migration | **+1 day** | `PROXY_USERS` removal, `deploy/`, `README`, `deploy/README.md`, the demo runsheet. |
-| **Total** | **5–7 days** | Roughly one sprint-week for one person. |
+| **Total** | **5–7 days** | Roughly one working week for one person. |
 
 This assumes the shim survives review. If it does not, add 2–3 days for the alternative (see
 below).

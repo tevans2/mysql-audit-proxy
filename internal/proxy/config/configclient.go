@@ -1,7 +1,7 @@
 package config
 
 // ConfigClient is the dedicated API client for live proxy configuration
-// polling — see docs/sprints for the live-config-reconciliation ticket. It
+// polling (live configuration reconciliation). It
 // owns exactly the concerns that belong to "how to ask the API for the
 // current configuration": the bearer token, ETag-based polling so an
 // unchanged snapshot costs a 304 instead of a full download, a bounded

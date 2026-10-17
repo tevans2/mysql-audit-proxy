@@ -1,6 +1,6 @@
-# Data Model & API Contract — Sprint 1
+# Data Model & API Contract
 
-**Owner:** Keagan · **Status:** CONFIRMED (2026-08-12) · **Scope:** Sprint 1 MVP
+**Status:** confirmed (2026-08-12), extended since
 
 This is the contract the proxy, audit sink, back-office API, and UI all code against.
 
@@ -383,7 +383,7 @@ Sanitized for the UI: passwords are never returned; `has_upstream_password` indi
 - Deferred past MVP: RBAC (per-role permissions on the API; today any valid session can use every Session route), tamper-evidence, normalised SQL fingerprint.
 
 ## Alignment
-Mirrors the shared `audit.Event` type in `/internal/audit` and the write path in `docs/sprints/sprint-1.md` (proxy → sink → `POST /api/events` → store). If this contract changes, update the `Event` type and `sprint-1.md` §7 to match.
+Mirrors the shared `audit.Event` type in `/internal/audit` and the write path (proxy → sink → `POST /api/events` → store; see [ADR 0003](decisions/0003-audit-write-path.md)). If this contract changes, update the `Event` type to match.
 
 ## Upstream TLS configuration contract
 

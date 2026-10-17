@@ -4,14 +4,13 @@
 
 Accepted, 2026-10-15, and revised after review the same day: retention is **off by
 default**, and 365 days with delete is the setting we recommend rather than one we
-apply. **Provisional until Acumen answers.**
+apply. **Provisional until the client answers.**
 How long to keep the log, and whether to delete or archive at expiry, was
-question 5 at the 24 September Sprint 2 demo and was not reached (see the
-"Not covered" line in [that meeting's notes](../../meetings/2026-09-24-sprint-2-demo.md)).
-The ticket asks for the period and the action to follow Acumen's answer, or our
+an open question at the 24 September client demo and was not reached.
+The requirement asks for the period and the action to follow the client's answer, or our
 stated default if there is none. This ADR is the stated default: no deletion
 until somebody turns it on, with 365 days and delete as the recommended setting.
-When Acumen answers, set the variables below to their answer (or, if they want
+When the client answers, set the variables below to their answer (or, if they want
 retention by default, change the default in `internal/retention` and this record).
 
 ## Context
@@ -47,7 +46,7 @@ number, and an upgrade never destroys data by itself. We recommend 365 days with
 `delete`: a year covers a normal audit and review cycle without keeping personal
 data indefinitely, and archiving needs a place to put the files that we cannot
 choose for the client (an archive nobody manages is the same retention problem
-with a different name). The number is ours, not Acumen's, which is why it is a
+with a different name). The number is ours, not the client's, which is why it is a
 recommendation in the documentation and the compose file's comment, and
 `retention.RecommendedDays` in the code, but not the default.
 
