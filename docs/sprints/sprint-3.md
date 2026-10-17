@@ -22,9 +22,12 @@ the ADRs and [known limitations](../known-limitations.md).
 
 ## What shipped
 
-Merge requests that landed on `main` after the Sprint 2 demo, by theme:
+Changes that landed on `main` after the Sprint 2 demo, by theme:
 
-| Theme | What | MR |
+The numbers in the last column are merge request numbers from the project's original GitLab
+history; they don't correspond to issues or pull requests in this repository.
+
+| Theme | What | Original MR |
 |---|---|---|
 | Proxy | Pass-through authentication: the proxy opens the session as a bootstrap user and has the database switch it to the connecting user, relaying the database's own challenge | #75 |
 | Proxy | Live proxy configuration: poll the API, reconcile listeners without a restart, report the applied revision | #40 |

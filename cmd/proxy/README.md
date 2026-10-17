@@ -481,7 +481,7 @@ session setup lives in `internal/proxy/runtime/session.go`. The
 the `spike/53-passthrough` tag (commit `d6ce56e7ac00aa7aa82009bece36349f1ace90e3`), uses
 that same connector, and never pools connections. Its TLS-only relay omits the
 spike's plaintext password decoding/re-encryption path. The production proxy's
-existing client authentication remains in place for the separate pass-through MR;
-that MR should supply the client relay and distinguish bootstrap failures from
+existing client authentication remains in place for the separate pass-through change;
+that change should supply the client relay and distinguish bootstrap failures from
 user authentication failures. Both legs must be encrypted before relaying through
 `DialChangeUser`.

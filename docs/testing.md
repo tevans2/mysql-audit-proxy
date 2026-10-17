@@ -77,7 +77,7 @@ Now write `classify` until it's green. **Table-driven tests** like this are the 
 - **`net/http/httptest`** — test API handlers without a real socket.
 - **In-memory SQLite** (`:memory:`) — fast, real SQL, no files.
 - **`testcontainers-go`** — spin up a real MySQL 8.0 in a container for proxy/integration tests.
-- **CI** runs unit + build + lint on every push/MR; integration tests run in CI too (they need Docker).
+- **CI** runs unit + build + lint on every push and pull request; integration tests run in CI too (they need Docker).
 - Optional: `testify` for terser asserts — fine to use, not required.
 
 ## 6. How each part is tested
@@ -169,7 +169,7 @@ go test -cover ./...  # with coverage
 
 The integration and end-to-end tests need upstream databases — `make test-env`
 starts them. Without them they skip, which is not the same as passing.
-CI runs the same on every push/MR; a red suite blocks merge.
+CI runs the same on every push and pull request; a red suite blocks merge.
 
 The performance tests are deliberately outside that loop. They measure rather
 than assert, so they are gated on `PERF=1` and CI never runs them: a threshold

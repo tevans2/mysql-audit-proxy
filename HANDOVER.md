@@ -224,8 +224,8 @@ numbers do not. Full detail in `docs/perf/`.
 - `make perf` — performance measurements (not pass/fail)
 - `make lint` — gofmt and go vet
 
-About 290 Go tests. The GitLab pipeline (`.gitlab-ci.yml`) runs lint → test → e2e on every
-push; integration and e2e tests **fail rather than skip** if a database is missing. Port it to
+About 290 Go tests. The GitHub Actions workflow (`.github/workflows/ci.yml`) runs lint → test → e2e (plus the web checks) on every
+pull request and push to `main`; integration and e2e tests **fail rather than skip** if a database is missing. Port it to
 your CI as-is. `docs/testing.md` explains the approach.
 
 **Rules the team followed, worth keeping:** every bug fix ships with a regression test verified

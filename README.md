@@ -115,6 +115,6 @@ make perf        # performance baseline — measurements, not pass/fail
 - [Architecture](docs/diagrams/architecture.md) — starting design diagram + how it fits together
 - [Ways of Working](docs/ways-of-working.md) — the build breakdown + our Scrum process
 - [Testing Strategy](docs/testing.md) — how we test + how to build for testability (TDD)
-- [Contributing](CONTRIBUTING.md) — Git/GitLab workflow (branches, merge requests, CI)
+- [Contributing](CONTRIBUTING.md) — Git/GitHub workflow (branches, pull requests, CI)
 - [Architecture Decisions](docs/design/decisions/) — ADRs recording key choices
 - `docs/spec/` — the client specification + our distilled requirements

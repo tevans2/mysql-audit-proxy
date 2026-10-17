@@ -33,7 +33,7 @@ Concretely, E covers:
 - **Infrastructure (the shared plumbing):**
   - `docker-compose` that spins up the whole system — proxy + audit DB + back-office + a
     couple of demo MySQL servers — so anyone can run and demo it with one command.
-  - The **GitLab CI pipeline** (`.gitlab-ci.yml`) that builds, lints and tests every push.
+  - The **GitHub Actions workflow** (`.github/workflows/ci.yml`) that builds, lints and tests every push.
   - Repo structure, dev tooling, and the local dev environment so everyone's set up the same.
 - **QA (making sure it actually works):**
   - The testing framework + the **integration tests** that prove the proxy relays traffic
@@ -87,8 +87,8 @@ software to the client**.
 - **Sprint review** — demo the working increment to the client + demi at sprint end.
 - **Retrospective** — after each sprint: what went well, what to improve (pick 1–2 changes).
 
-**Artifacts (all in GitLab)**
-- **Product backlog** — all work, as GitLab **issues**.
+**Artifacts (all in GitHub)**
+- **Product backlog** — all work, as GitHub **issues**.
 - **Sprint backlog** — issues assigned to the current **milestone**, tracked on the **board**
   (To Do → In Progress → In Review → Done).
 - **Increment** — the working product demoed each sprint.

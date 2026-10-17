@@ -1,10 +1,10 @@
 # Contributing
 
-How we work with Git and GitLab on this project. The goal: keep `main` always working
+How we work with Git and GitHub on this project. The goal: keep `main` always working
 and demoable, and make every change visible and reviewable.
 
-**New to Git / Scrum? Read this whole page once.** There's a plain-English glossary at the
-bottom. The workflow below is the same for everyone, every time — follow the steps in order.
+**New to Git or pull requests? Read this page once.** There is a plain-English glossary at
+the bottom. The workflow is the same for everyone, every time.
 
 ---
 
@@ -13,94 +13,94 @@ bottom. The workflow below is the same for everyone, every time — follow the s
 Every piece of work follows the same 7 steps:
 
 1. **Pick or create an issue** for the work.
-2. **Create a branch + a draft merge request _before_ you start coding.**
-3. **Do the work** — commit and push little and often.
-4. **Keep the MR description updated** with what you did and why.
-5. **Mark the MR ready and request a reviewer** when it's done.
+2. **Create a branch and open a draft pull request _before_ you start coding.**
+3. **Do the work**, committing and pushing little and often.
+4. **Keep the pull request description updated** with what you did and why.
+5. **Mark the pull request ready and request a reviewer** when it's done.
 6. **Address review comments.**
-7. **Merge** once approved and CI is green.
+7. **Merge** once it is approved and CI is green.
 
-> **Golden rule: no work without an issue, and no work without an MR open.**
+> **Golden rule: no work without an issue, and no work without a pull request open.**
 >
-> Issues + MRs are how the project stays **visible and trackable**. Together they create a
-> clear trail of *who did what, when, and why* — which matters for three reasons:
-> - **Review:** work in an MR can be read, discussed, and checked before it reaches `main`.
-> - **Marking:** our demo mark depends on the demi being able to *see* the project's progress
->   and history — a well-tracked board and clean MR trail is direct evidence of good process.
-> - **Individual peer review:** marks are moderated per person, and GitLab's record of your
->   issues, commits, and MRs is the fairest evidence of your contribution. Work done off the
->   board is invisible — it can't be reviewed, and it won't count for you.
->
-> If it isn't an issue on the board and a change in an MR, as far as the team, the reviewer,
-> and the marker are concerned, **it didn't happen.**
+> Issues and pull requests are how the project stays **visible and trackable**. Together they
+> leave a clear trail of *who did what, when, and why*:
+> - **Review:** work in a pull request can be read, discussed and checked before it reaches `main`.
+> - **History:** the issue explains the reason for a change long after the commit is forgotten.
+> - **Coordination:** the board shows what is in progress, so two people don't do the same thing.
 
 ---
 
 ## Step 1 — Pick or create an issue
 
-An **issue** is one unit of work (a feature, a fix, a task). Everything we do starts as an
-issue on the GitLab **board**.
+An **issue** is one unit of work (a feature, a fix, a task). Everything starts as an issue on
+the project board.
 
-- Go to the repo → **Plan → Issues** (or the **Board**).
-- **Claim** an existing issue by assigning it to yourself, or **create a new one** if the
-  work isn't captured yet. Give it a clear title and a short description of what "done" means.
-- Move its card to **In Progress** on the board so everyone knows you're on it.
-- **Only work on one issue at a time.** Finish it before starting the next.
+- Go to the repository → **Issues** (or the **Projects** board).
+- **Claim** an existing issue by assigning it to yourself, or **create a new one** if the work
+  isn't captured yet. Give it a clear title and a short description of what "done" means.
+- Move its card to **In Progress** on the board.
+- **Work on one issue at a time.** Finish it before starting the next.
 
-## Step 2 — Create a branch + draft MR *before* you start
+## Step 2 — Create a branch and a draft pull request *before* you start
 
-We open the merge request **first, empty**, so your work is visible from the very beginning.
-This is the easiest and safest way — GitLab does the fiddly Git bits for you.
+Open the pull request **first, nearly empty**, so your work is visible from the beginning.
 
 **Easiest way (from the issue page):**
 1. Open your issue.
-2. Click "Create merge request", which makes both a branch *and* a draft MR.
-3. GitLab creates a branch named after the issue (e.g. `12-connection-logging`) and a **Draft**
-   MR linked to it. Done — the MR now exists before you've written any code.
+2. In the right-hand sidebar, under **Development**, click **Create a branch**.
+3. GitHub creates a branch named after the issue (e.g. `12-connection-logging`).
 
 **Then get that branch onto your computer:**
 ```bash
 git checkout main
 git pull                       # get the latest main
-git fetch                      # see the new branch GitLab made
+git fetch                      # see the new branch GitHub made
 git checkout <branch-name>     # switch onto your branch, e.g. 12-connection-logging
 ```
 
-**If you'd rather do it from the terminal:** create the branch yourself, push it, then open
-a Draft MR in GitLab:
+**Then open the draft pull request.** A branch with no commits can't have a pull request, so
+make a first small commit (even a note in the description file), push it, and:
+```bash
+git commit --allow-empty -m "Start work on #12"
+git push -u origin <branch-name>
+gh pr create --draft --fill     # or: Pull requests → New pull request → "Create draft pull request"
+```
+
+**If you'd rather create the branch from the terminal:**
 ```bash
 git checkout main
 git pull
 git checkout -b feat/12-connection-logging   # see naming below
+git commit --allow-empty -m "Start work on #12"
 git push -u origin feat/12-connection-logging
-# then in GitLab: Merge requests → New → set your branch → tick "Mark as draft" → Create
+gh pr create --draft --fill
 ```
 
-> **Why open the MR before starting?** It makes your work visible immediately, runs CI on
-> every push, gives teammates a place to comment early, and means there's never a surprise
-> "giant MR" at the end. A **Draft** MR can't be merged by accident.
+> **Why open the pull request before starting?** It makes your work visible immediately, runs
+> CI on every push, gives teammates a place to comment early, and means there is never a
+> surprise "giant pull request" at the end. A **draft** pull request can't be merged by accident.
 
 ## Step 3 — Do the work (commit and push often)
 
-Work on your branch. Save your progress in small, logical **commits**, and **push** so it
-shows up in the MR:
+Work on your branch. Save your progress in small, logical **commits**, and **push** so it shows
+up in the pull request:
 ```bash
 git add .
 git commit -m "Add connection-level audit logging"
 git push
 ```
-- Commit in small chunks with clear, present-tense messages — not one giant commit at the end.
-- Push regularly. Every push updates the MR and re-runs CI, so you catch problems early.
+- Commit in small chunks with clear, present-tense messages, not one giant commit at the end.
+- Push regularly. Every push updates the pull request and re-runs CI, so you catch problems early.
 - Pull `main` into your branch now and then to avoid drifting too far:
   ```bash
   git checkout main && git pull
   git checkout <your-branch> && git merge main
   ```
 
-## Step 4 — Keep the MR description updated
+## Step 4 — Keep the pull request description updated
 
-The MR **description** is how the team (and your reviewer) understands your work without
-reading every line. Keep it current as you go. Use this template:
+The **description** is how the team understands your work without reading every line. Keep it
+current as you go. Use this template:
 
 ```markdown
 ## What & why
@@ -116,44 +116,45 @@ and to which upstream.
 - `docker-compose up`, connect a MySQL client, then check the `connections` table
 
 ## Notes / open questions
-- Auth-failure logging not done yet — will be a separate issue
+- Auth-failure logging not done yet; that will be a separate issue
 ```
 
 Fill in **what & why**, **what changed**, **how to test it**, and **anything relevant**
-(decisions, things you're unsure about, follow-ups). `Closes #12` auto-links the issue so it
-closes when the MR merges.
+(decisions, things you're unsure about, follow-ups). `Closes #12` links the issue, so it closes
+automatically when the pull request merges.
 
-## Step 5 — Mark ready & request a reviewer
+## Step 5 — Mark ready and request a reviewer
 
 When the work is finished and CI is green:
-1. **Remove the Draft status** (click **"Mark as ready"** on the MR).
-2. **Assign a Reviewer** — on the MR, set the **Reviewer** field to a teammate.
-3. **Actually tell them.** Assigning isn't enough — **message the person** in the team chat
+1. Click **Ready for review** on the pull request to remove the draft status.
+2. **Request a review** from a teammate, using the **Reviewers** field in the sidebar.
+3. **Actually tell them.** Requesting isn't enough; message the person.
 4. Move the board card to **In Review**.
 
 ## Step 6 — Address the review
 
-Your reviewer will leave comments. This is normal and good — it's how we catch bugs and
-learn from each other (**code review is also graded**).
-- Reply to comments, push fixes (the MR updates automatically).
-- Resolve threads once handled. Re-request review if there were big changes.
+Your reviewer will leave comments. This is normal and good: it is how we catch bugs and learn
+from each other.
+- Reply to comments and push fixes (the pull request updates automatically).
+- Resolve conversations once they are handled. Re-request review if there were big changes.
 
 ## Step 7 — Merge
 
-Once you have **at least one approval** and **CI is green**, merge the MR (**"Merge"** button).
-The issue closes and the board card moves to **Done**. `main` stays working. 🎉
+Once you have **at least one approval** and **CI is green**, merge the pull request with the
+**Merge pull request** button. The issue closes and the board card moves to **Done**. `main`
+stays working.
 
-> **Do NOT delete the branch when merging.** When GitLab asks, **untick "Delete source
-> branch"**. We keep every merged branch on purpose — it preserves a visible record of each
-> piece of work and the workflow behind it, which is direct evidence for review and marking.
-> Keeping branches costs us nothing; deleting them loses that history.
+> **Keep merged branches.** When GitHub offers **Delete branch** after the merge, leave it
+> alone unless the team has agreed otherwise. A kept branch preserves a visible record of each
+> piece of work. (Under **Settings → General → Pull Requests**, make sure *Automatically
+> delete head branches* is off if you want this to be the default.)
 
 ---
 
 ## Reference
 
 ### Branch naming
-If GitLab named the branch from the issue (e.g. `12-connection-logging`), that's fine to keep.
+If GitHub named the branch from the issue (e.g. `12-connection-logging`), that's fine to keep.
 If you name it yourself, use a prefix:
 ```
 feat/<issue#>-short-slug     # new feature      e.g. feat/12-connection-logging
@@ -163,18 +164,22 @@ spike/<issue#>-short-slug    # throwaway spike  e.g. spike/6-go-mysql
 ```
 
 ### Branching model
-Simple GitLab flow — a single stable trunk plus short-lived branches:
-- **`main`** is the single source of truth. It is **protected** and always working/demoable.
-  **Never push straight to `main`** — all changes go through an MR.
+Trunk-based: a single stable trunk plus short-lived branches.
+- **`main`** is the single source of truth. Protect it under **Settings → Branches → Branch
+  protection rules** (require a pull request, one approval and passing CI). It is always
+  working and demoable. **Never push straight to `main`.**
 - One short-lived branch per issue; merge it back within days, not weeks.
-- **Keep merged branches — never delete them.** They're our record of the work and workflow
-  for review and marking (untick "Delete source branch" when merging).
-- No permanent `staging`/`develop` branch (not worth the overhead for our size). We'll add a
+- **Keep merged branches.** They are the record of the work.
+- No permanent `staging` or `develop` branch (not worth the overhead for our size). Add a
   single `develop` branch only if half-done work starts breaking `main` between demos.
 
 ### CI
-- `.gitlab-ci.yml` runs build + lint + tests on every push and MR.
-- A **red pipeline blocks merge.** Fix it, or keep the MR as Draft until it's green.
+- `.github/workflows/ci.yml` runs lint, unit tests, end-to-end tests and the web checks on every
+  pull request and every push to `main`.
+- A **red check blocks merge** once branch protection requires it. Fix it, or keep the pull
+  request as a draft until it is green.
+- To run the same checks locally, see the `Makefile` (`make lint`, `make test`, `make web-test`,
+  `make test-e2e`).
 
 ### Tagging demos
 At each sprint demo we tag the commit so we always have a known-good point to return to:
@@ -184,21 +189,20 @@ git push origin sprint-1-demo
 ```
 
 ### Definition of Done
-A task is done when: code is written, **unit-tested**, **reviewed and merged** via MR,
-**CI is green**, and it **runs in `docker-compose`**.
+A task is done when: code is written, **unit-tested**, **reviewed and merged** through a pull
+request, **CI is green**, and it **runs in `docker-compose`**.
 
 ---
 
-## Glossary (for anyone new to Git/Scrum)
+## Glossary (for anyone new to Git or Scrum)
 
-- **Issue** — one unit of work, tracked on the board. Everything starts here.
-- **Branch** — your own copy of the code to work on, so you don't disturb `main`.
-- **Commit** — a saved snapshot of your changes, with a message describing them.
-- **Push** — upload your commits to GitLab so others (and CI) can see them.
-- **Merge Request (MR)** — a request to merge your branch into `main`; where review and CI
-  happen. (GitHub calls this a "Pull Request".)
-- **Draft MR** — an MR still in progress; can't be merged until marked "ready".
-- **Reviewer** — a teammate who reads your MR and approves or requests changes.
-- **CI (pipeline)** — automated build + tests that run on every push.
-- **`main`** — the stable branch we demo from; protected, always working.
-- **Sprint** — a fixed work period ending in a demo to the client. We run three.
+- **Issue**: one unit of work, tracked on the board. Everything starts here.
+- **Branch**: your own copy of the code to work on, so you don't disturb `main`.
+- **Commit**: a saved snapshot of your changes, with a message describing them.
+- **Push**: upload your commits to GitHub so others (and CI) can see them.
+- **Pull request (PR)**: a request to merge your branch into `main`; where review and CI happen.
+- **Draft pull request**: a pull request still in progress; it can't be merged until marked "ready".
+- **Reviewer**: a teammate who reads your pull request and approves or requests changes.
+- **CI (GitHub Actions)**: automated build and tests that run on every push and pull request.
+- **`main`**: the stable branch we demo from; protected, always working.
+- **Sprint**: a fixed work period ending in a demo to the client. We run three.

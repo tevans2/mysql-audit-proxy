@@ -199,14 +199,14 @@ Makefile       # make run / make test / make lint
 - **Fail-safe auditing (D8):** the relay path must never return an error to the client because of an audit problem. Emit is non-blocking; the sink handles buffering/overflow/logging.
 - **Depend on interfaces, not implementations:** proxy → `Sink`; API → `Store`. Use the provided stubs (in-memory `Store`, no-op/HTTP `Sink`) so nobody is blocked.
 - **Config via file + env; secrets only via env** (never commit passwords).
-- **Git workflow:** issue → draft MR before starting → keep MR description updated → review → merge; keep merged branches (see `CONTRIBUTING.md`).
+- **Git workflow:** issue → draft pull request before starting → keep its description updated → review → merge; keep merged branches (see `CONTRIBUTING.md`).
 - **Small vertical slices:** get the trivial end-to-end path working before deepening any one box.
 
 ## 11. Testing strategy (Sprint 1)
 - **Unit:** the parser's command detection; the sink's batching + fail-safe behaviour; the store's save/query.
 - **Integration:** `testcontainers` (or a compose-based test) spins up a real MySQL; assert the proxy relays a simple query without corrupting the result and that an event lands in the store.
 - **Manual demo test:** the 5 success criteria in §3, run end-to-end via `docker-compose`.
-- CI runs unit + build + lint on every push/MR.
+- CI runs unit + build + lint on every push and pull request.
 
 ## 12. Timeline & milestones
 
