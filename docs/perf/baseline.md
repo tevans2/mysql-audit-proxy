@@ -1,16 +1,16 @@
-# Performance Baseline — Sprint 2
+# Performance baseline (initial)
 
-Acumen specified **25–50 concurrent connections**. Until now that was unmeasured, which
+The client specified **25–50 concurrent connections**. Until now that was unmeasured, which
 made "how many people can use this?" a question we could not answer at all. This is the
 answer, the method behind it, and what it does not cover.
 
 Measured 23 Sep 2026 against `main` at [`cd0959e`](../../). Reproduce with `make perf`.
 
 > **Superseded in part (project close, 16 Oct 2026).** The overhead and connection-cost figures
-> below describe Sprint 2's proxy. Since then the audit sink blocks by default
+> below describe the initial proxy. Since then the audit sink blocks by default
 > ([ADR 0005](../design/decisions/0005-audit-sink-blocks-by-default.md)) and every session logs in
 > to the upstream as its own user ([ADR 0004](../design/decisions/0004-pass-through-authentication.md)),
-> so use the [Sprint 3 re-run](sprint-3-rerun.md) for current numbers. This document also
+> so use the [block-mode re-run](block-mode-rerun.md) for current numbers. This document also
 > attributes the audit ceiling "substantially" to SQLite. Measuring the store directly showed
 > writes are not the limit; see [ADR 0007](../design/decisions/0007-sqlite-remains-the-audit-store.md).
 
@@ -26,7 +26,7 @@ Measured 23 Sep 2026 against `main` at [`cd0959e`](../../). Reproduce with `make
   rather than blocking the query path — and it is the number to quote, because it is where
   the product's guarantee changes.
 - **A connection costs ~300 µs more through the proxy.** The TLS handshake and
-  `caching_sha2_password` added in Sprint 2 are not expensive.
+  `caching_sha2_password` are not expensive.
 
 ## What was measured
 
@@ -122,8 +122,8 @@ with a number attached to it.
 | direct | 624 µs | 841 µs | 1.05 ms | 1.84 ms |
 | proxied | 963 µs | 1.64 ms | 2.65 ms | 3.39 ms |
 
-Measured separately because Sprint 2 made it more expensive: the proxy now terminates TLS
-and offers `caching_sha2_password` where Sprint 1 offered `mysql_native_password` in the
+Measured separately because that release made it more expensive: the proxy now terminates TLS
+and offers `caching_sha2_password` where the first version offered `mysql_native_password` in the
 clear. The answer is that it is cheap — about 340 µs — and steady-state query latency
 hides it entirely, since it is paid once per session. It matters only to something that
 connects per request.
@@ -156,7 +156,7 @@ audit log that receives *nothing*, which is a broken pipeline rather than satura
 
 ## Caveats — read before quoting any of this
 
-- **The absolute latencies are not Acumen's.** Upstream MySQL runs in Docker Desktop's VM
+- **The absolute latencies are not the client's.** Upstream MySQL runs in Docker Desktop's VM
   with virtualised networking, and the proxy runs natively on the host. Their production
   would have neither arrangement. The **difference** between the direct and proxied paths
   is the transferable number; the raw milliseconds are not.
@@ -181,7 +181,7 @@ could be called a weakness — audit loss above ~7,500 statements/second — is 
 design trade rather than a defect, and sits well above anything the specified load
 produces.
 
-Worth filing for Sprint 3, not fixing now:
+Worth filing, not fixing now:
 
 1. **Expose the sink's drop counter.** `Stats()` exists and nothing calls it, so the only
    evidence of loss today is a log line. An audit tool should be able to prove it did not

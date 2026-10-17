@@ -110,8 +110,8 @@ argued.
 | **COM_CHANGE_USER** | **4.53 ms** | 8.7 ms |
 
 The extra round trip is real and costs **~0.4 ms per connection** against the shim, paid once per
-session. At the 25–50 connections Acumen specified that is not a consideration. As with the
-Sprint 2 baseline, the *difference* transfers; the absolute figures do not.
+session. At the 25–50 connections the client specified that is not a consideration. As with the
+initial baseline, the *difference* transfers; the absolute figures do not.
 
 ---
 
@@ -173,7 +173,7 @@ connect rather than at query time.
 go-mysql, not a shim" — with COM_CHANGE_USER on a bootstrap connection, and record the bootstrap
 credential and the no-pooling rule as consequences.
 
-It is the only option tested that needs **no fork** (nothing for Acumen to inherit at handover, no
+It is the only option tested that needs **no fork** (nothing for the client to inherit at handover, no
 `replace` directive, no waiting on an upstream review queue) and **no fabricated protocol state**
 (go-mysql negotiates its own capabilities, so the most dangerous variable is gone). It deletes
 ~250 lines of delicate code — `shimConn`, `fakeInitialHandshake`, `fakeOK`, `clientCapabilities` —

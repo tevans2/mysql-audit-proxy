@@ -119,7 +119,7 @@ func TestAuditTrailRecordsWhichUpstream(t *testing.T) {
 // TestServersEndpointDescribesRunningStack checks that the back-office is told
 // the mapping the proxies are actually routing by.
 //
-// It returned an empty list for the whole of Sprint 1 — the API read its config
+// It returned an empty list for the whole of the first version — the API read its config
 // from a path nothing supplied — which looked exactly like "no servers
 // configured" to the UI.
 func TestServersEndpointDescribesRunningStack(t *testing.T) {

@@ -27,7 +27,7 @@ CREATE TABLE sales.orders (
 );
 
 INSERT INTO sales.customers (name, email) VALUES
-  ('Acumen Software', 'accounts@acumen.example'),
+  ('Example Software', 'accounts@example-software.example'),
   ('Cape Fitters',    'ops@capefitters.example'),
   ('Bothma Logistics','admin@bothma.example');
 

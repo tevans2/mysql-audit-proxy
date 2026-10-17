@@ -1,11 +1,11 @@
-# Performance Re-run — Sprint 3
+# Performance re-run: block mode and per-user connections
 
-Re-measures what changed since the [Sprint 2 baseline](sprint-2-baseline.md): the audit sink
+Re-measures what changed since the [initial baseline](baseline.md): the audit sink
 now **blocks** when its buffer is full ([ADR 0005](../design/decisions/0005-audit-sink-blocks-by-default.md)),
 and every client session now logs in to the upstream **as that user** (pass-through
 authentication, [ADR 0004](../design/decisions/0004-pass-through-authentication.md)).
 
-Measured 15 Oct 2026 on `main` at `5702cea`, plus the harness change in this commit.
+Measured 15 Oct 2026.
 Reproduce with `make perf`; `PERF_SINK_MODES=block,drop` selects the sink modes.
 
 ## The short version
@@ -20,7 +20,7 @@ Reproduce with `make perf`; `PERF_SINK_MODES=block,drop` selects the sink modes.
 - **At the specified load there is no cost.** At 2,500 q/s block and drop are the same, and
   lossless. The headroom before blocking starts to matter is about 7× the specification.
 - **A connection now costs about 2.2 ms more through the proxy**, up from about 0.3 ms in the
-  Sprint 2 baseline. This is the per-user upstream login. It is paid once per session.
+  initial baseline. This is the per-user upstream login. It is paid once per session.
 
 ## Block mode under overload
 
@@ -56,7 +56,7 @@ Reading it:
   (~18,500/s against ~13,000/s). Drop mode is probably slower to store because the proxy and
   the load generator compete with the API for CPU at that rate. I did not isolate that.
 - **The first loss in drop mode is now at about 12,500 q/s (0.33%)**, against 7,500 (2.9%) in the
-  Sprint 2 baseline. The sink and API are not the same code or machine state, so treat the
+  initial baseline. The sink and API are not the same code or machine state, so treat the
   shift as "somewhat higher", not as a precise gain.
 - **The ~200 ms maximum appears in every row, including direct to MySQL**, at the same
   magnitude. It is a client-side or loopback artifact (delayed-ACK scale), not the proxy and not
@@ -74,7 +74,7 @@ Reading it:
 | direct | 270 µs | 565 µs | 647 µs | 673 µs |
 | proxied | 2.46 ms | 5.50 ms | 6.04 ms | 6.14 ms |
 
-A proxied connection now costs about **2.2 ms more at p50 and 5 ms at p95**. The Sprint 2
+A proxied connection now costs about **2.2 ms more at p50 and 5 ms at p95**. The initial
 baseline was ~0.34 ms more (0.62 ms direct, 0.96 ms proxied). The direct path is faster this
 time (270 µs against 624 µs) and the proxied one slower, so the gap has grown from
 ~0.3 ms to ~2.2 ms. The cause matches what pass-through does: the proxy terminates the client's TLS, then
@@ -102,11 +102,11 @@ What it means:
 | `scan100` | 50 | 2.78 ms | 5.74 ms | 5.18 ms | 9.72 ms | +4.54 ms |
 
 Audit completeness at the specified load: 651, 16,275 and 32,550 statements run, and the
-same number audited, at 1, 25 and 50 connections. This agrees with the Sprint 2 baseline.
+same number audited, at 1, 25 and 50 connections. This agrees with the initial baseline.
 
 ## Caveats
 
-- **One run per row.** The Sprint 2 baseline took the median of three. A single run cannot
+- **One run per row.** The initial baseline took the median of three. A single run cannot
   separate small differences from noise; the large ones above (block versus drop loss and
   throughput, the connection cost) are well outside it.
 - **A noisy machine.** The load average was about 3.1 at the start, with other applications open.

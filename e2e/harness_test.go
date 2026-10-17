@@ -5,7 +5,7 @@
 // It runs the real `proxy` and `api` executables as subprocesses rather than
 // wiring their packages together in-process. The difference matters — the
 // endpoint serving the port mapping returned an empty list for the whole of
-// Sprint 1 because nothing supplied its config file, and no in-process test
+// the first version because nothing supplied its config file, and no in-process test
 // could have noticed, since the gap was in main's environment handling rather
 // than in any package it calls.
 //

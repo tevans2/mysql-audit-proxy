@@ -1,7 +1,7 @@
 package runtime
 
 // Reconciler is the "turn a Plan into real listener changes" half of the
-// live-config-reconciliation ticket (docs/sprints). Manager (manager.go)
+// live-config-reconciliation work. Manager (manager.go)
 // only ever computes what needs to change, as pure PlanItems, against no
 // real listener at all — Reconciler is what actually binds, updates,
 // drains, and removes *Proxy instances to carry one out, on top of the

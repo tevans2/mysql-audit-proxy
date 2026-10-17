@@ -17,7 +17,7 @@
 # secret.
 
 services:
-  # db-a keeps the Sprint 1 identity: port 3306, root/rootpass, and the 'demo'
+  # db-a keeps the original identity: port 3306, root/rootpass, and the 'demo'
   # database and user — .env.example's values. internal/proxy/runtime's integration tests
   # default to exactly that, so changing them in deploy/.env means pointing
   # the tests at the new values too (PROXY_TEST_UPSTREAM_PASS, E2E_DB_A_PASS).
@@ -41,7 +41,7 @@ services:
     networks:
       default:
         aliases:
-          # This service was called 'db' through Sprint 1. The alias keeps
+          # This service used to be called 'db'. The alias keeps
           # 'db:3306' resolving for branches written before the rename.
           - db
     healthcheck:
@@ -115,7 +115,7 @@ services:
       # The proxy below presents the same value, from the same variable.
       API_PROXY_TOKEN: ${API_PROXY_TOKEN:?set in deploy/.env — see deploy/README.md}
       # Audit-log retention (ADR 0006). OFF by default: with 0 days nothing is
-      # ever deleted, because deletion cannot be undone and Acumen has not told
+      # ever deleted, because deletion cannot be undone and the client has not told
       # us how long to keep records. We recommend 365 days with "delete"; set
       # API_RETENTION_DAYS=365 in deploy/.env to turn that on. Try it first with
       # API_RETENTION_DRY_RUN=true, which only logs what would be removed. The

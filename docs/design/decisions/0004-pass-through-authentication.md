@@ -2,9 +2,9 @@
 
 ## Status
 
-Accepted and implemented — 2026-10-16. Proposed 2026-10-06, required by the client at the Sprint 2
-demo (24 Sep 2026) and scheduled as Sprint 3 P1. The proxy change merged on 13 Oct (#75) and its
-end-to-end tests on 15 Oct (#74); the Sprint 3 [performance re-run](../../perf/sprint-3-rerun.md)
+Accepted and implemented — 2026-10-16. Proposed 2026-10-06, required by the client at a
+demo (24 Sep 2026) and prioritised first. The proxy change merged on 13 Oct (#75) and its
+end-to-end tests on 15 Oct (#74); the [performance re-run](../../perf/block-mode-rerun.md)
 measured the cost (about 2.2 ms more per connection). The decision below is unchanged from the
 proposal apart from the 8 Oct amendment.
 
@@ -18,7 +18,7 @@ long-lived connection owned by the proxy under a configured account.
 
 ## Context
 
-Sprints 1 and 2 had the proxy authenticate clients itself, against a `PROXY_USERS` credential
+Earlier versions had the proxy authenticate clients itself, against a `PROXY_USERS` credential
 store, and open every session's pinned upstream connection as one configured account. Identity
 was therefore **recorded but not enforced**. Measured on `main`, through the proxy, logged in as
 `alice`:
@@ -31,11 +31,11 @@ SELECT COUNT(*) FROM sales.orders  ->  <nil>        # succeeded; alice has no gr
 Every session reaching MySQL as the same account means per-user grants do not apply, a revoked
 user keeps working until someone edits `PROXY_USERS`, and the audit log is the only thing
 standing between a user and any table the service account can read. This was recorded as an open
-question with the client from 20 Aug and carried through both sprint plans.
+question with the client from 20 Aug and carried through the early plans.
 
-At the Sprint 2 demo on 25 Sep, Acumen's CTO answered it: the proxy must connect to the database
+At a client demo on 25 Sep, the client's CTO answered it: the proxy must connect to the database
 **as each individual user**, with per-user upstream connections, so that identity is enforced by
-MySQL rather than merely observed by us. That makes it Sprint 3 P1 and closes the question.
+MySQL rather than merely observed by us. That made it the top priority and closed the question.
 
 The remaining question was feasibility, which issue #53 answered with a spike — a working
 prototype, written up in full at
@@ -172,7 +172,7 @@ Four points bound that decision.
 - **The account's plugin now dictates what the client must support.** Today the proxy always
   speaks `caching_sha2_password` to the client and hides the account's plugin entirely. After
   this, any account still on `mysql_native_password` becomes unreachable from a MySQL 9 client,
-  which removed the plugin outright. To raise with Acumen before it ships.
+  which removed the plugin outright. To raise with the client before it ships.
 
 **What this required**
 
@@ -197,7 +197,7 @@ client's. The audit event's own `client_addr` field is still correct.
   initial handshake advertises the *server's* default plugin rather than the account's, so the
   relayed auth-switch becomes the client's second — which real clients refuse.
 - **Audit-only identity, as today.** Rejected by the client at the demo. It was a defensible
-  position for an auditing tool, and it is not the one Acumen asked for.
+  position for an auditing tool, and it is not the one the client asked for.
 - **A shim that replays a fabricated handshake to go-mysql.** This was the first prototype's
   upstream half: perform the connection phase by hand on a raw socket, then give `client.Conn` a
   `net.Conn` that replays a scripted server handshake so it believes it connected itself. It
@@ -205,7 +205,7 @@ client's. The audit event's own `client_addr` field is still correct.
   needs no bootstrap credential, and connects about 0.4 ms faster. Rejected because it copies
   go-mysql's capability set by hand and assumes the library writes its handshake response in a
   single `Write`; both assumptions fail silently, as truncated or mis-parsed result sets at
-  query time. It would also be the most fragile code handed to Acumen. It remains in the history
+  query time. It would also be the most fragile code handed to the client. It remains in the history
   of the `spike/53-passthrough` tag.
 - **A `replace` patch to go-mysql** adding an `Option` on `client.Conn` to supply the auth
   response (~20 lines), upstreamed if they will take it. This was the original point 4.

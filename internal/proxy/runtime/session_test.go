@@ -21,8 +21,8 @@ import (
 )
 
 // Tests for Proxy.Run's context-cancellation lifecycle and session tracking —
-// the "stoppable listeners" step of the live-config-reconciliation ticket
-// (docs/sprints). These deliberately need no real upstream MySQL server:
+// the "stoppable listeners" step of live-config reconciliation.
+// These deliberately need no real upstream MySQL server:
 // Run only ever touches the upstream once a client logs in, and most of what's
 // being tested here (ctx cancellation stopping Accept, a closed listener not
 // being logged as an accept error) never gets that far. The tests that

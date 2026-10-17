@@ -1,5 +1,5 @@
 // Performance baseline for the proxy: what does putting Lustre in front of a
-// database cost, at the 25-50 concurrent connections Acumen specified?
+// database cost, at the 25-50 concurrent connections the client specified?
 //
 // These are measurements, not assertions, so they are gated on PERF=1 and
 // never run as part of `go test ./...` or CI. A benchmark that fails a build
@@ -555,9 +555,9 @@ const (
 // TestPerfConnectionCost measures establishing a session, not running queries
 // on one.
 //
-// Worth its own measurement because Sprint 2 made it much more expensive. The
+// Worth its own measurement because a later release made it much more expensive. The
 // proxy now terminates TLS and offers caching_sha2_password (MySQL 8's
-// default) where Sprint 1 offered mysql_native_password in the clear, so every
+// default) where the first version offered mysql_native_password in the clear, so every
 // connection pays for a TLS handshake and an RSA-backed exchange that did not
 // exist before. Steady-state query latency hides that entirely: it is paid
 // once per session, which is invisible to a long-lived client and significant
@@ -618,7 +618,7 @@ func TestPerfConnectionCost(t *testing.T) {
 // TestPerfAuditCeiling finds the offered rate at which the audit trail starts
 // losing records.
 //
-// TestPerfAuditCompleteness answers "is it lossless at the load Acumen
+// TestPerfAuditCompleteness answers "is it lossless at the load the client
 // described"; this answers "how much headroom is there before it isn't". The
 // gap between the two is the number worth quoting, because it says how far the
 // system can be pushed past the specification before its guarantee changes.

@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted - 2026-09-24, client direction at the Sprint 2 demo. Supersedes the
+Accepted - 2026-09-24, client direction at a demo. Supersedes the
 "audit must never block or break a query" guarantee from ADR 0003.
 
 ## Context
@@ -12,24 +12,23 @@ ADR 0003 established that the proxy's audit sink is strictly non-blocking:
 API, so a slow or unreachable audit backend can never add latency to a query.
 That was treated as a structural property, not an implementation detail.
 
-The Sprint 2 performance baseline (see
-[docs/perf/sprint-2-baseline.md](../../perf/sprint-2-baseline.md)) found the
+The initial performance baseline (see
+[docs/perf/baseline.md](../../perf/baseline.md)) found the
 limit of that design: above roughly 7,500 statements/second, the buffered
 channel fills faster than the worker can drain it. At that point the sink has
 exactly two choices, drop new audit records to keep letting queries through,
 or block the query path to keep every record.
 
-Dropping was the implicit behaviour ADR 0003 assumed, but the team flagged at
-the 23 Sept internal meeting that this is a real trade nobody had put a number
+Dropping was the implicit behaviour ADR 0003 assumed, but the team flagged
+internally that this is a real trade nobody had put a number
 on for the client, and that choosing to block would directly reverse ADR
-0003's guarantee. The question was put to the client at the 24 Sept sprint
-demo. Their answer: block.
+0003's guarantee. The question was put to the client at a demo on 24 Sept. Their answer: block.
 
 ## Decision
 
 When the audit sink's buffer is full, the proxy now **blocks** on emitting a
 new audit event rather than dropping it. Audit completeness takes priority
-over query latency under sustained overload (per the Sprint 2 baseline).
+over query latency under sustained overload (per the initial baseline).
 
 This explicitly reverses the "auditing must never block or break a query"
 property from ADR 0003's Decision and Consequences sections. ADR 0003's
@@ -71,10 +70,10 @@ records. See `cmd/proxy/README.md`.
   what is already buffered, not what is still waiting to enter.
 - Makes visibility into sink pressure more important than it was under
   drop-and-continue, since a filling buffer now has a user-facing symptom.
-  `sink.Stats()` existed but nothing called it when this was written, a
-  Sprint 2 commitment the perf baseline ranked #1 for Sprint 3. This ADR
+  `sink.Stats()` existed but nothing called it when this was written, an
+  open commitment the perf baseline ranked first. This ADR
   doesn't implement that monitoring; it only changes the buffer-full
-  behaviour. *Resolved later in Sprint 3 (#49): the proxy now serves
+  behaviour. *Resolved later (#49): the proxy now serves
   `lustre_audit_queue_depth`, `lustre_audit_dropped_total` and the other sink
   counters on its admin port; see `cmd/proxy/README.md`. Nothing displays or
   alerts on them.*
@@ -88,7 +87,7 @@ records. See `cmd/proxy/README.md`.
 - **Bounded wait, then drop** (block up to some timeout, then fall back to
   dropping). Could cap worst-case latency impact while still favouring
   completeness. Not discussed with the client as a distinct option, worth
-  raising in Sprint 3 if the plain-block behaviour proves too costly in
+  raising if the plain-block behaviour proves too costly in
   practice, but not adopted now since it wasn't what was decided.
 - **A durable queue between proxy and API**, giving more buffer headroom
   before either blocking or dropping is forced. Already rejected in ADR

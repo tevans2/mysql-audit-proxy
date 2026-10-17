@@ -27,7 +27,7 @@ We want **many fast unit tests, some integration tests, few end-to-end tests.**
 ## 3. Design for testability (this is what makes TDD possible)
 You can only test-drive code that's built to be substitutable. Five rules — follow these and tests become easy; ignore them and testing becomes painful.
 
-> **As built (project close, 16 Oct 2026).** This strategy was written in Sprint 1 as intent. Two
+> **As built (16 Oct 2026).** This strategy was written up front as intent. Two
 > things differ in the finished system. The API holds a concrete `*store.Store`, not a `Store`
 > interface, and tests use an in-memory SQLite database instead of a fake
 > ([ADR 0007](design/decisions/0007-sqlite-remains-the-audit-store.md)). And the audit sink now
@@ -77,12 +77,12 @@ Now write `classify` until it's green. **Table-driven tests** like this are the 
 - **`net/http/httptest`** — test API handlers without a real socket.
 - **In-memory SQLite** (`:memory:`) — fast, real SQL, no files.
 - **`testcontainers-go`** — spin up a real MySQL 8.0 in a container for proxy/integration tests.
-- **CI** runs unit + build + lint on every push/MR; integration tests run in CI too (they need Docker).
+- **CI** runs unit + build + lint on every push and pull request; integration tests run in CI too (they need Docker).
 - Optional: `testify` for terser asserts — fine to use, not required.
 
 ## 6. How each part is tested
 
-### Proxy — *Joe + Mieke* (`/proxy`)
+### Proxy (`/proxy`)
 - **Unit (most of it):** the packet/command detection and SQL extraction are pure functions — table-driven tests over byte slices. `classify`, "is this a `COM_QUERY`?", multi-packet framing math. Test-drive these.
 - **Relay logic:** test with a **fake `Sink`** (records events in a slice) and in-memory pipes (`net.Pipe`) so no real MySQL is needed — assert the right events are emitted for a scripted exchange.
 - **Integration:** `testcontainers` real MySQL 8.0 — connect through the proxy, run a `SELECT`, assert the result is uncorrupted and a statement event was emitted. This is where you prove pass-through correctness.
@@ -93,14 +93,14 @@ func (f *fakeSink) Emit(e audit.Event) { f.events = append(f.events, e) }
 // inject fakeSink into the session, drive a scripted client, assert f.events
 ```
 
-### Sink / pipeline — *Maria* (`/proxy` / `/internal/audit`)
+### Sink / pipeline (`/proxy` / `/internal/audit`)
 - **Unit only, no real network:** inject a **fake HTTP client** (`HTTPDoer` interface). Test: events get batched; a batch is POSTed at the size/time threshold; **fail-safe** — when the fake client returns an error, `Emit` still never blocks or panics (the query path is protected). This is the most important behaviour to prove.
 ```go
 type HTTPDoer interface { Do(*http.Request) (*http.Response, error) }
 // pass a fake that returns errors -> assert Emit still returns immediately
 ```
 
-### API + Store — *Keagan* (`/backoffice`)
+### API + Store (`/backoffice`)
 - **Handlers:** `httptest` + an **in-memory `Store`**. POST a batch to `/api/events`, assert `202` and that the store received it; GET `/api/connections`, assert the JSON shape.
 - **Store:** run the SQLite implementation against **in-memory SQLite** — save events, query them back, assert. Same tests can later run against Postgres to prove the interface holds.
 ```go
@@ -112,7 +112,7 @@ srv.ServeHTTP(rec, req)
 // assert rec.Code == 202 and store has 1 event
 ```
 
-### End-to-end — *Tate* (`/e2e`)
+### End-to-end (`/e2e`)
 
 Runs the built `proxy` and `api` executables as subprocesses against two real
 upstream databases, connects a MySQL client through each proxy port, and reads
@@ -120,7 +120,7 @@ the audit trail back over HTTP. It covers what no package test can: that the
 pieces are wired to each other correctly.
 
 The distinction earns its keep. `GET /api/servers` returned an empty list for the
-whole of Sprint 1 — `cmd/api` read its config from a path nothing supplied. Every
+whole of the first version — `cmd/api` read its config from a path nothing supplied. Every
 package test passed, because the gap was in `main`'s environment handling rather
 than in any package it calls. Running the real binary is what catches that class
 of bug.
@@ -146,7 +146,7 @@ an init script. The seeding identifies a server before writing to it — seeding
 first and checking afterwards leaves a marker naming the wrong server behind on
 the way to the failure, corrupting the environment every other test reads.
 
-### UI — *Maria* (`/web`)
+### UI (`/web`)
 - Keep it light (crude UI is fine for MVP). **Manual testing** against the stub API + the real API is the baseline. If time allows, a couple of component tests, but don't over-invest — the client said don't polish the UI, and that applies to its tests too.
 
 ## 7. Test doubles we provide (in the scaffolding)
@@ -169,13 +169,13 @@ go test -cover ./...  # with coverage
 
 The integration and end-to-end tests need upstream databases — `make test-env`
 starts them. Without them they skip, which is not the same as passing.
-CI runs the same on every push/MR; a red suite blocks merge.
+CI runs the same on every push and pull request; a red suite blocks merge.
 
 The performance tests are deliberately outside that loop. They measure rather
 than assert, so they are gated on `PERF=1` and CI never runs them: a threshold
 baked into a test would either fail on a loaded shared runner or pass straight
 through a real regression on a quiet one. Results and method live in
-[docs/perf](perf/sprint-2-baseline.md).
+[docs/perf](perf/baseline.md).
 
 ## 9. Definition of Done (ties back to CONTRIBUTING)
 A task isn't done until it's **tested**: pure logic has unit tests, a part talking to a real dependency has at least one integration test, and CI is green. "It works on my machine" without a test doesn't count — an untested feature is invisible evidence at marking time.

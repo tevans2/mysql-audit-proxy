@@ -1,0 +1,142 @@
+# Runs on every pull request and every push to main. The runner image ships
+# gcc, which the API needs -- mattn/go-sqlite3 is a cgo package, so
+# CGO_ENABLED=0 would fail to build the store.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A newer push to the same branch makes the older run pointless.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      # Only our tracked files, so a module cache or vendored source is never
+      # reported as unformatted.
+      - name: gofmt
+        run: |
+          test -z "$(gofmt -l $(git ls-files '*.go'))" || { echo 'not gofmt formatted:'; gofmt -l $(git ls-files '*.go'); exit 1; }
+      - run: go mod download
+      - run: go vet ./...
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpass
+          MYSQL_DATABASE: demo
+          MYSQL_USER: demo
+          MYSQL_PASSWORD: demopass
+        ports:
+          - 3306:3306
+        # Without waiting for health, the proxy's integration tests would race
+        # MySQL starting up.
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -prootpass"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    env:
+      # Without an upstream the proxy's integration tests skip themselves, which
+      # would quietly cover far less than it looks like. Point them at the service.
+      PROXY_TEST_UPSTREAM_ADDR: 127.0.0.1:3306
+      PROXY_TEST_UPSTREAM_USER: root
+      PROXY_TEST_UPSTREAM_PASS: rootpass
+      # Fail, don't skip, if the upstream is unreachable: a MySQL service that
+      # never starts must turn the run red, not green with nothing tested.
+      PROXY_TEST_REQUIRE_UPSTREAM: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go mod download
+      - run: go test -count=1 -shuffle=on ./...
+
+  # Drives the built binaries the way the compose stack does: a proxy in front of
+  # each of two databases, the API collecting what they emit, asserted by reading
+  # back over HTTP. Separate from `test` because it needs two upstreams, and
+  # because a failure here means the system is broken rather than a package.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    services:
+      # Both take the same root password, so the two share credentials and
+      # differ by schema instead.
+      db-a:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpass
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -prootpass"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+      db-b:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpass
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -prootpass"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    env:
+      E2E_DB_A_ADDR: 127.0.0.1:3306
+      E2E_DB_A_USER: root
+      E2E_DB_A_PASS: rootpass
+      E2E_DB_B_ADDR: 127.0.0.1:3307
+      E2E_DB_B_USER: root
+      E2E_DB_B_PASS: rootpass
+      # The tests skip when an upstream is unreachable, which in CI is
+      # indistinguishable from passing. This turns that skip into a failure.
+      E2E_REQUIRE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go mod download
+      # The per-user accounts' passwords are generated here rather than
+      # committed: the tests create the accounts on these bare containers
+      # themselves. Written to GITHUB_ENV so later steps see them.
+      - name: Generate per-user passwords
+        run: |
+          for v in E2E_DB_A_ALICE_PASS E2E_DB_A_BOOTSTRAP_PASS E2E_DB_B_BOB_PASS E2E_DB_B_BOOTSTRAP_PASS; do
+            echo "$v=$(head -c 12 /dev/urandom | od -An -tx1 | tr -d ' \n')" >> "$GITHUB_ENV"
+          done
+      - run: go test -count=1 -v -timeout 30m ./e2e/
+
+  # The UI's pure helpers and the CSP source check. Its own job because it needs
+  # node rather than Go, and neither needs a database to run.
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test 'web/**/*.test.mjs'
+      - run: make csp-check

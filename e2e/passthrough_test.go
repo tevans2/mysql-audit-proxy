@@ -404,8 +404,18 @@ func TestPassThroughBadBootstrapCredentialIsAGenericErrorAndNotAFailedLogin(t *t
 		}
 	}
 
-	// The operator, not the client, learns which account failed.
-	if !strings.Contains(s.proxyLog.String(), bootstrapUser) {
+	// The operator, not the client, learns which account failed. The proxy
+	// logs while it answers, and its output reaches us through a pipe, so the
+	// line can arrive just after the client's error does; wait for it rather
+	// than racing it.
+	named := false
+	for deadline := time.Now().Add(5 * time.Second); time.Now().Before(deadline); time.Sleep(50 * time.Millisecond) {
+		if strings.Contains(s.proxyLog.String(), bootstrapUser) {
+			named = true
+			break
+		}
+	}
+	if !named {
 		t.Errorf("the proxy log never names the bootstrap account, so the operator cannot tell what to fix")
 	}
 

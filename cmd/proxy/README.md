@@ -109,7 +109,7 @@ PROXY_CONFIG_FILE=deploy/upstreams.json: routing db-a (0.0.0.0:3307), db-b (0.0.
 ### Single upstream (`PROXY_CONFIG_FILE` unset)
 
 Without `PROXY_CONFIG_FILE`, the proxy falls back to one upstream from these variables — the
-original Sprint 1 shape, still what `go run ./cmd/proxy` uses with no setup:
+original single-upstream shape, still what `go run ./cmd/proxy` uses with no setup:
 
 | Variable | Default | Description |
 |---|---|---|
@@ -445,7 +445,7 @@ If no upstream MySQL is reachable, tests are **automatically skipped** (not fail
 | `sink.Fake` | Logs events to stdout (placeholder for the batched HTTP sink) |
 | `audit.Event` | Audit record shared with the API — see `docs/design/data-model.md` §Ingest |
 
-## What needs to be implemented for Sprint 2
+## Possible improvements
 
 *   **Robust Telemetry & Metrics:** Expose Prometheus metrics (e.g., active sessions, query latency, connection errors) to monitor the proxy's operational health.
 *   **Failed Login Auditing:** Ensure failed authentication attempts generate distinct audit events for security monitoring.
@@ -481,7 +481,7 @@ session setup lives in `internal/proxy/runtime/session.go`. The
 the `spike/53-passthrough` tag (commit `d6ce56e7ac00aa7aa82009bece36349f1ace90e3`), uses
 that same connector, and never pools connections. Its TLS-only relay omits the
 spike's plaintext password decoding/re-encryption path. The production proxy's
-existing client authentication remains in place for the separate pass-through MR;
-that MR should supply the client relay and distinguish bootstrap failures from
+existing client authentication remains in place for the separate pass-through change;
+that change should supply the client relay and distinguish bootstrap failures from
 user authentication failures. Both legs must be encrypted before relaying through
 `DialChangeUser`.
