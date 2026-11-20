@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // markerQuery reads the routing marker. Both upstreams answer it; the value
 // names whichever one actually served the query.
-const markerQuery = "SELECT name FROM lustre_test.upstream_marker"
+const markerQuery = "SELECT name FROM auditproxy_test.upstream_marker"
 
 // TestEachProxyPortReachesItsOwnUpstream is the acceptance test for the
 // multi-upstream environment: several databases, each reachable through its own

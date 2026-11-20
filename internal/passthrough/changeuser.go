@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"lustre/internal/upstream"
+	"github.com/tevans2/mysql-audit-proxy/internal/upstream"
 
 	"github.com/go-mysql-org/go-mysql/client"
 	"github.com/go-mysql-org/go-mysql/mysql"
@@ -148,7 +148,7 @@ func buildChangeUser(caps uint32, user string) ([]byte, error) {
 		return nil, errors.New("invalid user name for COM_CHANGE_USER")
 	}
 
-	key, value := []byte("_client_name"), []byte("lustre")
+	key, value := []byte("_client_name"), []byte("mysql-audit-proxy")
 	attrs := append(mysql.PutLengthEncodedInt(uint64(len(key))), key...)
 	attrs = append(attrs, mysql.PutLengthEncodedInt(uint64(len(value)))...)
 	attrs = append(attrs, value...)
@@ -179,7 +179,7 @@ func buildChangeUser(caps uint32, user string) ([]byte, error) {
 // generic client error and suppress auth_fail.
 //
 // Error() is deliberately generic, because the cause names the bootstrap
-// account ("Access denied for user 'lustre_bootstrap'@…"): a caller that
+// account ("Access denied for user 'auditproxy_bootstrap'@…"): a caller that
 // forwards err.Error() to a client by mistake must not leak it. Operators get
 // the detail from Detail().
 type BootstrapError struct{ Cause error }

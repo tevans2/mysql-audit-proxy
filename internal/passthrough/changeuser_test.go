@@ -19,10 +19,9 @@ func TestBuildChangeUserLayout(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	attrs := []byte{
-		12, '_', 'c', 'l', 'i', 'e', 'n', 't', '_', 'n', 'a', 'm', 'e',
-		6, 'l', 'u', 's', 't', 'r', 'e',
-	}
+	const clientName = "mysql-audit-proxy"
+	attrs := []byte{12, '_', 'c', 'l', 'i', 'e', 'n', 't', '_', 'n', 'a', 'm', 'e', byte(len(clientName))}
+	attrs = append(attrs, clientName...)
 	want := []byte{0, 0, 0, 0, mysql.COM_CHANGE_USER}
 	want = append(want, "alice"...)
 	want = append(want, 0)                                   // user terminator
@@ -79,7 +78,7 @@ func TestBootstrapFailureIsClassifiedAndQuiet(t *testing.T) {
 	addr := l.Addr().String()
 	l.Close()
 
-	_, err = DialChangeUser(context.Background(), addr, "lustre_bootstrap_secret_name", "pw", "alice",
+	_, err = DialChangeUser(context.Background(), addr, "auditproxy_bootstrap_secret_name", "pw", "alice",
 		&testRelay{secure: true}, time.Second, &tls.Config{InsecureSkipVerify: true})
 	if err == nil {
 		t.Fatal("expected a bootstrap failure")
@@ -92,17 +91,17 @@ func TestBootstrapFailureIsClassifiedAndQuiet(t *testing.T) {
 	if errors.As(err, &myErr) {
 		t.Fatal("bootstrap failure must never look like a database rejection (it would be audited as auth_fail)")
 	}
-	if strings.Contains(err.Error(), "lustre_bootstrap_secret_name") {
+	if strings.Contains(err.Error(), "auditproxy_bootstrap_secret_name") {
 		t.Fatalf("Error() leaks the bootstrap account: %q", err.Error())
 	}
 }
 
 func TestBootstrapErrorDetailKeepsCauseForOperators(t *testing.T) {
-	be := &BootstrapError{Cause: errors.New("Access denied for user 'lustre_bootstrap'")}
-	if !strings.Contains(be.Detail(), "lustre_bootstrap") {
+	be := &BootstrapError{Cause: errors.New("Access denied for user 'auditproxy_bootstrap'")}
+	if !strings.Contains(be.Detail(), "auditproxy_bootstrap") {
 		t.Fatalf("operator detail lost the cause: %q", be.Detail())
 	}
-	if strings.Contains(be.Error(), "lustre_bootstrap") {
+	if strings.Contains(be.Error(), "auditproxy_bootstrap") {
 		t.Fatalf("Error() leaks the cause: %q", be.Error())
 	}
 	if (&BootstrapError{}).Detail() != "" {

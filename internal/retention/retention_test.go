@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"lustre/internal/audit"
-	"lustre/internal/store"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/store"
 )
 
 // now is the clock for every test. With 30 days of retention the cutoff is

@@ -19,7 +19,7 @@ import (
 	"testing"
 	"time"
 
-	"lustre/internal/upstream"
+	"github.com/tevans2/mysql-audit-proxy/internal/upstream"
 
 	"github.com/go-mysql-org/go-mysql/client"
 	"github.com/go-mysql-org/go-mysql/mysql"
@@ -85,9 +85,9 @@ func newLiveDB(t *testing.T) *liveDB {
 	// CI service has no fixture data). IF NOT EXISTS makes parallel packages
 	// and repeated runs harmless.
 	for _, q := range []string{
-		"CREATE DATABASE IF NOT EXISTS lustre_pt",
-		"CREATE TABLE IF NOT EXISTS lustre_pt.customers (id INT PRIMARY KEY)",
-		"CREATE TABLE IF NOT EXISTS lustre_pt.secret (id INT PRIMARY KEY)",
+		"CREATE DATABASE IF NOT EXISTS auditproxy_pt",
+		"CREATE TABLE IF NOT EXISTS auditproxy_pt.customers (id INT PRIMARY KEY)",
+		"CREATE TABLE IF NOT EXISTS auditproxy_pt.secret (id INT PRIMARY KEY)",
 	} {
 		if _, err := admin.Execute(q); err != nil {
 			t.Fatalf("%s: %v", q, err)
@@ -106,7 +106,7 @@ func (db *liveDB) exec(t *testing.T, format string, args ...any) {
 }
 
 // newAccount creates a database user with the given plugin ("" for the
-// server default). With grant it may read lustre_pt.customers (and not lustre_pt.secret);
+// server default). With grant it may read auditproxy_pt.customers (and not auditproxy_pt.secret);
 // without, it has no privileges at all (the shape of the bootstrap account).
 func (db *liveDB) newAccount(t *testing.T, plugin string, grant bool) account {
 	t.Helper()
@@ -123,7 +123,7 @@ func (db *liveDB) newAccount(t *testing.T, plugin string, grant bool) account {
 		_, _ = db.admin.Execute(fmt.Sprintf("DROP USER IF EXISTS '%s'@'%%'", a.name))
 	})
 	if grant {
-		db.exec(t, "GRANT SELECT ON lustre_pt.customers TO '%s'@'%%'", a.name)
+		db.exec(t, "GRANT SELECT ON auditproxy_pt.customers TO '%s'@'%%'", a.name)
 	}
 	db.secrets = append(db.secrets, a.password)
 	return a
@@ -307,11 +307,11 @@ func TestLiveLoginIsTheRealUser(t *testing.T) {
 					t.Errorf("SELECT USER() = %q, want it to start with %q", got, acct.name+"@")
 				}
 
-				if _, err := conn.Execute("SELECT COUNT(*) FROM lustre_pt.customers"); err != nil {
+				if _, err := conn.Execute("SELECT COUNT(*) FROM auditproxy_pt.customers"); err != nil {
 					t.Errorf("granted table was refused: %v", err)
 				}
 
-				_, err = conn.Execute("SELECT * FROM lustre_pt.secret")
+				_, err = conn.Execute("SELECT * FROM auditproxy_pt.secret")
 				if me := asMyError(err); me == nil || me.Code != mysql.ER_TABLEACCESS_DENIED_ERROR {
 					t.Errorf("ungranted table: got %v, want error 1142 from the database", err)
 				}

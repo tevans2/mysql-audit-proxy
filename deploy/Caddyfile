@@ -3,7 +3,7 @@
 #
 #   SITE_ADDRESS=localhost          -> https://localhost, Caddy's own local CA
 #                                      (the browser warns once)
-#   SITE_ADDRESS=lustre.example.com -> a real certificate fetched and renewed
+#   SITE_ADDRESS=audit.example.com -> a real certificate fetched and renewed
 #                                      automatically; needs public DNS and
 #                                      ports 80 and 443 reachable
 #

@@ -1,4 +1,4 @@
-/* Lustre back office. All styling lives here: the edge CSP forbids inline
+/* Back office. All styling lives here: the edge CSP forbids inline
    styles, so nothing may be set with a style attribute or a <style> block. */
 
 /* Self-hosted so the CSP's default-src 'self' covers font-src. Both files are

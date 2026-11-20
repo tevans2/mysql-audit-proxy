@@ -68,7 +68,7 @@ A production deployment needs the following; none of it is optional.
 | Locked out of the back-office | No reset flow: update the `admins` table directly (see `deploy/README.md` → Back-office Administrator Accounts) |
 | Rotate the bootstrap password | Change it in MySQL, then re-enter it on the Servers screen |
 | Check health | Proxy `GET :9100/healthz` and `GET :9100/metrics` (Prometheus text) |
-| Watch for audit loss | `lustre_audit_failed_total` and `lustre_audit_dropped_total` should stay at 0; `lustre_audit_queue_depth` near 0 |
+| Watch for audit loss | `auditproxy_audit_failed_total` and `auditproxy_audit_dropped_total` should stay at 0; `auditproxy_audit_queue_depth` near 0 |
 | Reseed the dev stack | `docker compose -f deploy/docker-compose.yml down -v`, then `make up` |
 
 **Metrics exist but nothing consumes them yet.** Point Prometheus (or your monitoring) at the

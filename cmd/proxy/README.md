@@ -201,12 +201,12 @@ not a refused connection. A bind failure is fatal.
 
 | Metric | Type | Meaning |
 |---|---|---|
-| `lustre_audit_queue_depth` | gauge | Audit events buffered and not yet picked up for delivery. Settles at the buffer size when the API stalls. |
-| `lustre_audit_emitted_total` | counter | Events handed to the sink. |
-| `lustre_audit_sent_total` | counter | Events delivered to the API. |
-| `lustre_audit_dropped_total` | counter | Events discarded: buffer full with `SINK_ON_FULL=drop`, or the sink shutting down. |
-| `lustre_audit_failed_total` | counter | Events lost because delivery failed after retries. |
-| `lustre_config_applied_revision` | gauge | Highest configuration revision fully applied. Only in live mode (`API_PROXY_TOKEN`). |
+| `auditproxy_audit_queue_depth` | gauge | Audit events buffered and not yet picked up for delivery. Settles at the buffer size when the API stalls. |
+| `auditproxy_audit_emitted_total` | counter | Events handed to the sink. |
+| `auditproxy_audit_sent_total` | counter | Events delivered to the API. |
+| `auditproxy_audit_dropped_total` | counter | Events discarded: buffer full with `SINK_ON_FULL=drop`, or the sink shutting down. |
+| `auditproxy_audit_failed_total` | counter | Events lost because delivery failed after retries. |
+| `auditproxy_config_applied_revision` | gauge | Highest configuration revision fully applied. Only in live mode (`API_PROXY_TOKEN`). |
 
 The audit metrics are absent when `SINK_INGEST_URL` is unset, because the logging sink has no queue
 to report. **Do not publish this port or route it through the edge**: nothing on it is for clients,

@@ -38,7 +38,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // upstream describes one of the two databases under test.
@@ -187,7 +187,7 @@ func buildBinaries(t *testing.T) (proxyBin, apiBin string) {
 	t.Helper()
 
 	buildOnce.Do(func() {
-		dir, err := os.MkdirTemp("", "lustre-e2e-bin-*")
+		dir, err := os.MkdirTemp("", "auditproxy-e2e-bin-*")
 		if err != nil {
 			buildErr = fmt.Errorf("creating build dir: %w", err)
 			return
@@ -405,7 +405,7 @@ func startStackWith(t *testing.T, opts stackOpts, ups ...upstream) *stack {
 	s.apiURL = fmt.Sprintf("http://127.0.0.1:%d", apiPort)
 	start(t, "api", apiBin, []string{
 		fmt.Sprintf("API_LISTEN_ADDR=127.0.0.1:%d", apiPort),
-		"API_DB_PATH=" + filepath.Join(dir, "lustre.db"),
+		"API_DB_PATH=" + filepath.Join(dir, "auditproxy.db"),
 		"API_ADMIN_PASS_HASH=$2a$10$p/JfpdaXDpAp5XhXeDax6OdUOClgnJGA8zH3X7Gxrf0dv5zvjb/UW",
 		"API_CONFIG_KEY=0123456789abcdef0123456789abcdef",
 		"API_PROXY_TOKEN=e2e-secret-token-123",
@@ -527,7 +527,7 @@ func (s *stack) getJSON(t *testing.T, path string, out any) {
 func markerNames(db *sql.DB) ([]string, error) {
 	var n int
 	err := db.QueryRow(`SELECT COUNT(*) FROM information_schema.tables
-		WHERE table_schema = 'lustre_test' AND table_name = 'upstream_marker'`).Scan(&n)
+		WHERE table_schema = 'auditproxy_test' AND table_name = 'upstream_marker'`).Scan(&n)
 	if err != nil {
 		return nil, err
 	}
@@ -535,7 +535,7 @@ func markerNames(db *sql.DB) ([]string, error) {
 		return nil, nil
 	}
 
-	rows, err := db.Query("SELECT name FROM lustre_test.upstream_marker ORDER BY name")
+	rows, err := db.Query("SELECT name FROM auditproxy_test.upstream_marker ORDER BY name")
 	if err != nil {
 		return nil, err
 	}
@@ -589,9 +589,9 @@ func seedUpstream(t *testing.T, u upstream) {
 	}
 
 	stmts := append([]string{
-		"CREATE DATABASE IF NOT EXISTS lustre_test",
-		"CREATE TABLE IF NOT EXISTS lustre_test.upstream_marker (name VARCHAR(32) NOT NULL PRIMARY KEY)",
-		fmt.Sprintf("INSERT IGNORE INTO lustre_test.upstream_marker (name) VALUES (%q)", u.name),
+		"CREATE DATABASE IF NOT EXISTS auditproxy_test",
+		"CREATE TABLE IF NOT EXISTS auditproxy_test.upstream_marker (name VARCHAR(32) NOT NULL PRIMARY KEY)",
+		fmt.Sprintf("INSERT IGNORE INTO auditproxy_test.upstream_marker (name) VALUES (%q)", u.name),
 	}, u.seed...)
 	for _, q := range stmts {
 		if _, err := db.Exec(q); err != nil {

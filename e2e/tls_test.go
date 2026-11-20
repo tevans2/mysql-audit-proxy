@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"lustre/internal/audit"
-	"lustre/internal/passthrough"
-	secureupstream "lustre/internal/upstream"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/passthrough"
+	secureupstream "github.com/tevans2/mysql-audit-proxy/internal/upstream"
 
 	"github.com/go-mysql-org/go-mysql/mysql"
 )

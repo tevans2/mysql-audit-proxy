@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // TestProxyQueryRelay verifies that a SELECT through the proxy returns the

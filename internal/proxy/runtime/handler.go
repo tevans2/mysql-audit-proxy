@@ -11,7 +11,7 @@ import (
 	"github.com/go-mysql-org/go-mysql/server"
 	"github.com/go-mysql-org/go-mysql/stmt"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // eventTimeFormat is how audit.Event.At is rendered.

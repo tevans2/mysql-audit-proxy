@@ -29,7 +29,7 @@ done
 MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -uroot <<SQL
 CREATE USER 'alice'@'%' IDENTIFIED WITH caching_sha2_password BY '${ALICE_PASSWORD}';
 GRANT SELECT ON sales.customers TO 'alice'@'%';
-GRANT SELECT ON lustre_test.upstream_marker TO 'alice'@'%';
+GRANT SELECT ON auditproxy_test.upstream_marker TO 'alice'@'%';
 
 CREATE USER 'proxy_bootstrap'@'%' IDENTIFIED WITH caching_sha2_password BY '${BOOTSTRAP_PASSWORD}';
 GRANT USAGE ON *.* TO 'proxy_bootstrap'@'%';

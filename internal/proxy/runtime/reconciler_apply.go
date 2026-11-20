@@ -6,7 +6,7 @@ import (
 	"net"
 	"strconv"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // applyAdd is ActionAdd: bind the configured port and start accepting.

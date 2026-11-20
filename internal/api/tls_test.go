@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"lustre/internal/audit"
-	"lustre/internal/store"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/store"
 )
 
 func TestServerTLSContract(t *testing.T) {

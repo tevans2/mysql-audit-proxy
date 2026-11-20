@@ -1,4 +1,4 @@
-module lustre
+module github.com/tevans2/mysql-audit-proxy
 
 go 1.26.0
 

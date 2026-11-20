@@ -8,7 +8,7 @@ package sink
 import (
 	"log"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // Fake logs events to stdout. Used for local runs, and as the default until the

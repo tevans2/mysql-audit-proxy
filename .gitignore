@@ -14,8 +14,8 @@ deploy/tls-test/certs/
 bin/
 /proxy
 /api
-lustre.db
-lustre.db-shm
-lustre.db-wal
+auditproxy.db
+auditproxy.db-shm
+auditproxy.db-wal
 *.test
 *.out

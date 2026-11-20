@@ -1,4 +1,4 @@
-# Spike: pass-through authentication for the Lustre proxy
+# Spike: pass-through authentication for the proxy
 
 **Issue:** #53 — per-user identity at the database
 **Tag:** `spike/53-passthrough` (not for merge; it contains both routes, this document's shim as `-mode shim`.

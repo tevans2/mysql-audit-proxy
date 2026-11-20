@@ -10,7 +10,7 @@ import (
 
 	sqldriver "github.com/go-sql-driver/mysql"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // Prepared statements — HandleStmtPrepare/Execute/Close in handler_stmt.go. The

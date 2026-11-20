@@ -1,4 +1,4 @@
-# Lustre back office (web UI)
+# Back office (web UI)
 
 Back-office web UI, gated by an admin login. Three screens:
 

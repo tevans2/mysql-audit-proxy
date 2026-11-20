@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"lustre/internal/sink"
+	"github.com/tevans2/mysql-audit-proxy/internal/sink"
 )
 
 // The admin server is the proxy's operator-facing HTTP surface: a liveness and
@@ -96,14 +96,14 @@ func (a *adminState) handleMetrics(w http.ResponseWriter, r *http.Request) {
 
 	if stats != nil {
 		st := stats.Stats()
-		metric("lustre_audit_queue_depth", "gauge", "Audit events buffered and not yet picked up for delivery.", stats.QueueDepth())
-		metric("lustre_audit_emitted_total", "counter", "Audit events handed to the sink.", st.Emitted)
-		metric("lustre_audit_sent_total", "counter", "Audit events delivered to the API.", st.Sent)
-		metric("lustre_audit_dropped_total", "counter", "Audit events discarded: buffer full in drop mode, or sink shutting down.", st.Dropped)
-		metric("lustre_audit_failed_total", "counter", "Audit events lost because delivery failed after retries.", st.Failed)
+		metric("auditproxy_audit_queue_depth", "gauge", "Audit events buffered and not yet picked up for delivery.", stats.QueueDepth())
+		metric("auditproxy_audit_emitted_total", "counter", "Audit events handed to the sink.", st.Emitted)
+		metric("auditproxy_audit_sent_total", "counter", "Audit events delivered to the API.", st.Sent)
+		metric("auditproxy_audit_dropped_total", "counter", "Audit events discarded: buffer full in drop mode, or sink shutting down.", st.Dropped)
+		metric("auditproxy_audit_failed_total", "counter", "Audit events lost because delivery failed after retries.", st.Failed)
 	}
 	if revFn != nil {
-		metric("lustre_config_applied_revision", "gauge", "Highest configuration revision fully applied by this proxy.", revFn())
+		metric("auditproxy_config_applied_revision", "gauge", "Highest configuration revision fully applied by this proxy.", revFn())
 	}
 }
 

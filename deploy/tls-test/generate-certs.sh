@@ -7,7 +7,7 @@ if [ -f certs/ca.pem ] && [ -f certs/db-a.pem ] && [ -f certs/db-b.pem ]; then
   exit 0
 fi
 umask 077
-openssl req -x509 -newkey rsa:2048 -nodes -days 7 -subj /CN=Lustre-TLS-test-CA \
+openssl req -x509 -newkey rsa:2048 -nodes -days 7 -subj /CN=AuditProxy-TLS-test-CA \
   -keyout certs/ca-key.pem -out certs/ca.pem 2>/dev/null
 for name in db-a db-b; do
   openssl req -newkey rsa:2048 -nodes -subj "/CN=$name" \

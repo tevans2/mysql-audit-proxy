@@ -55,19 +55,19 @@ func TestCredentialsFindEveryoneButNobody(t *testing.T) {
 
 func TestFailClassification(t *testing.T) {
 	logs := &logCapture{}
-	p := NewProvider(Config{Addr: "db:3306", BootstrapUser: "lustre_bootstrap", Logf: logs.Logf})
+	p := NewProvider(Config{Addr: "db:3306", BootstrapUser: "auditproxy_bootstrap", Logf: logs.Logf})
 
 	t.Run("bootstrap failure is generic to the client and detailed to the operator", func(t *testing.T) {
-		cause := errors.New("Access denied for user 'lustre_bootstrap'@'10.0.0.1' (using password: YES)")
+		cause := errors.New("Access denied for user 'auditproxy_bootstrap'@'10.0.0.1' (using password: YES)")
 		err := p.fail("alice", &BootstrapError{Cause: cause})
 		me, ok := err.(*mysql.MyError)
 		if !ok || me.Code != mysql.ER_UNKNOWN_ERROR {
 			t.Fatalf("got %T %v, want the generic 1105 error", err, err)
 		}
-		if strings.Contains(me.Error(), "lustre_bootstrap") || strings.Contains(me.Error(), "Access denied") {
+		if strings.Contains(me.Error(), "auditproxy_bootstrap") || strings.Contains(me.Error(), "Access denied") {
 			t.Fatalf("client-visible error leaks the bootstrap account: %q", me.Error())
 		}
-		if !strings.Contains(logs.text(), "lustre_bootstrap") {
+		if !strings.Contains(logs.text(), "auditproxy_bootstrap") {
 			t.Fatalf("operator log lost the bootstrap detail: %q", logs.text())
 		}
 	})
@@ -82,7 +82,7 @@ func TestFailClassification(t *testing.T) {
 			if !ok || me.Code != mysql.ER_UNKNOWN_ERROR || !strings.Contains(me.Message, want) {
 				t.Errorf("cause %v: got %v, want a message containing %q", cause, err, want)
 			}
-			if strings.Contains(me.Message, "lustre_bootstrap") {
+			if strings.Contains(me.Message, "auditproxy_bootstrap") {
 				t.Errorf("message names the bootstrap account: %q", me.Message)
 			}
 		}

@@ -29,8 +29,8 @@ import (
 	"github.com/go-mysql-org/go-mysql/mysql"
 	"github.com/go-mysql-org/go-mysql/packet"
 
-	"lustre/internal/audit"
-	"lustre/internal/proxy/config"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/proxy/config"
 )
 
 // reconcilerSilentUpstream accepts exactly one TCP connection and then goes

@@ -8,7 +8,7 @@ import (
 	"github.com/go-mysql-org/go-mysql/mysql"
 	"github.com/go-mysql-org/go-mysql/stmt"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // HandleStmtPrepare forwards a COM_STMT_PREPARE to the upstream and returns

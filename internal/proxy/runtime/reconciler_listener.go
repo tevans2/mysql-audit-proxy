@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // defaultBindTimeout bounds how long applyAdd/applyMovePort wait for a new

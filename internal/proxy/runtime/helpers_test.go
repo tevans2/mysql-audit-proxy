@@ -15,8 +15,8 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"lustre/internal/audit"
-	"lustre/internal/proxy/config"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/proxy/config"
 )
 
 // ---------------------------------------------------------------------------
@@ -172,9 +172,9 @@ func seedRoutingMarker(t *testing.T, addr, user, pass, name string) {
 	defer db.Close()
 
 	stmts := []string{
-		"CREATE DATABASE IF NOT EXISTS lustre_test",
-		"CREATE TABLE IF NOT EXISTS lustre_test.upstream_marker (name VARCHAR(32) NOT NULL PRIMARY KEY)",
-		fmt.Sprintf("INSERT IGNORE INTO lustre_test.upstream_marker (name) VALUES (%q)", name),
+		"CREATE DATABASE IF NOT EXISTS auditproxy_test",
+		"CREATE TABLE IF NOT EXISTS auditproxy_test.upstream_marker (name VARCHAR(32) NOT NULL PRIMARY KEY)",
+		fmt.Sprintf("INSERT IGNORE INTO auditproxy_test.upstream_marker (name) VALUES (%q)", name),
 	}
 	for _, q := range stmts {
 		if _, err := db.Exec(q); err != nil {

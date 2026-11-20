@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"testing"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 func postEvents(t *testing.T, url, authorization string, events []audit.Event) int {

@@ -3,7 +3,7 @@ package store
 import (
 	"fmt"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // TLSUpdate distinguishes omitted fields from explicit empty values in API PUTs.

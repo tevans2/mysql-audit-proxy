@@ -71,7 +71,7 @@ func accountPass(t *testing.T, key string) string {
 // accountsFor returns the accounts expected on an upstream.
 func accountsFor(t *testing.T, u upstream) []account {
 	t.Helper()
-	marker := "SELECT name FROM lustre_test.upstream_marker"
+	marker := "SELECT name FROM auditproxy_test.upstream_marker"
 	boot := account{
 		user:    bootstrapUser,
 		pass:    bootstrapPass(t, u),
@@ -84,13 +84,13 @@ func accountsFor(t *testing.T, u upstream) []account {
 		return []account{{
 			user:    aliceUser,
 			pass:    alicePass(t),
-			grants:  []string{"GRANT SELECT ON hr.* TO %s", "GRANT SELECT ON lustre_test.upstream_marker TO %s"},
+			grants:  []string{"GRANT SELECT ON hr.* TO %s", "GRANT SELECT ON auditproxy_test.upstream_marker TO %s"},
 			allowed: []string{"SELECT COUNT(*) FROM hr.employees", marker},
 			denied:  []string{"SELECT COUNT(*) FROM mysql.user"},
 		}, {
 			user:    bobUser,
 			pass:    bobPass(t),
-			grants:  []string{"GRANT SELECT ON hr.* TO %s", "GRANT SELECT ON lustre_test.upstream_marker TO %s"},
+			grants:  []string{"GRANT SELECT ON hr.* TO %s", "GRANT SELECT ON auditproxy_test.upstream_marker TO %s"},
 			allowed: []string{"SELECT COUNT(*) FROM hr.employees", marker},
 			denied:  []string{"SELECT COUNT(*) FROM mysql.user"},
 		}, boot}
@@ -100,7 +100,7 @@ func accountsFor(t *testing.T, u upstream) []account {
 			pass: alicePass(t),
 			// sales.* rather than one table, so the performance tests can read
 			// the table they seed as alice.
-			grants:  []string{"GRANT SELECT ON sales.* TO %s", "GRANT SELECT ON lustre_test.upstream_marker TO %s"},
+			grants:  []string{"GRANT SELECT ON sales.* TO %s", "GRANT SELECT ON auditproxy_test.upstream_marker TO %s"},
 			allowed: []string{"SELECT COUNT(*) FROM sales.customers", marker},
 			denied:  []string{"SELECT COUNT(*) FROM mysql.user"},
 		}, boot}

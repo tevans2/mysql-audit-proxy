@@ -46,7 +46,7 @@ authentication as missing; all four have shipped and are no longer listed.
   specified load (about 2,500/s) is far below either threshold.
 - **Delivery is still not durable.** Blocking closes the buffer-overflow path only. A batch the
   API keeps refusing is given up on after the sink's retries (about 15 s), counted in
-  `lustre_audit_failed_total`, and not replayed. A real API outage loses records. There is no disk
+  `auditproxy_audit_failed_total`, and not replayed. A real API outage loses records. There is no disk
   buffer.
 - **An event waiting to enter a full buffer at shutdown is dropped.** Shutdown drains what is
   already buffered, not what is still waiting.

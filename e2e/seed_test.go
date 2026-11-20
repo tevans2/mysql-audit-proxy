@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // Same shape as deploy/upstreams.json: no passwords.
@@ -116,7 +116,7 @@ type uiServers struct {
 func TestAPISeedsServersFromConfigPath(t *testing.T) {
 	_, apiBin := buildBinaries(t)
 	dir := t.TempDir()
-	dbPath := filepath.Join(dir, "lustre.db")
+	dbPath := filepath.Join(dir, "auditproxy.db")
 	seedPath := filepath.Join(dir, "upstreams.json")
 	if err := os.WriteFile(seedPath, []byte(seedFile), 0o600); err != nil {
 		t.Fatal(err)
@@ -212,7 +212,7 @@ func TestAPIRefusesUnreadableSeedFile(t *testing.T) {
 	dir := t.TempDir()
 	seedPath := filepath.Join(dir, "missing.json")
 	cmd := exec.Command(apiBin)
-	cmd.Env = apiEnv(freePort(t), filepath.Join(dir, "lustre.db"), seedPath)
+	cmd.Env = apiEnv(freePort(t), filepath.Join(dir, "auditproxy.db"), seedPath)
 
 	// Capture the output, because a non-zero exit on its own proves nothing:
 	// any startup failure produces one -- a lost race for the port, a future
@@ -248,7 +248,7 @@ func TestAPIRefusesUnreadableSeedFile(t *testing.T) {
 func TestAPIStartsWithPopulatedTableAndBrokenSeedFile(t *testing.T) {
 	_, apiBin := buildBinaries(t)
 	dir := t.TempDir()
-	dbPath := filepath.Join(dir, "lustre.db")
+	dbPath := filepath.Join(dir, "auditproxy.db")
 	seedPath := filepath.Join(dir, "upstreams.json")
 	if err := os.WriteFile(seedPath, []byte(seedFile), 0o644); err != nil {
 		t.Fatal(err)

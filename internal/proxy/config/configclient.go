@@ -22,7 +22,7 @@ import (
 	"sync"
 	"time"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // ErrConfigUnauthorized is returned by Fetch when the API rejects the

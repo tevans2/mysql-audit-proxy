@@ -84,16 +84,16 @@ services:
       dockerfile: deploy/Dockerfile
       args:
         CMD: api
-    container_name: lustre-api
+    container_name: auditproxy-api
     environment:
       API_LISTEN_ADDR: ":8080"
       # On the volume, so the audit log survives a rebuild.
-      API_DB_PATH: /data/lustre.db
+      API_DB_PATH: /data/auditproxy.db
       # First-boot seed for the servers table, applied only when the table is
       # empty (a fresh api-data volume). After that the database is the source
       # of truth: edits made through /api/servers survive restarts, and changing
       # this file has no effect until the volume is wiped (`down -v`).
-      API_CONFIG_PATH: /etc/lustre/upstreams.json
+      API_CONFIG_PATH: /etc/auditproxy/upstreams.json
       # Upstream passwords for the seeded rows, keyed by the file's "name". The
       # file holds none, and the proxy's API mode refuses a server with no
       # password. These are the bootstrap accounts' passwords, the same variables
@@ -131,7 +131,7 @@ services:
     # and the proxy reaches it as api:8080 on the compose network.
     volumes:
       - api-data:/data
-      - ./upstreams.json:/etc/lustre/upstreams.json:ro
+      - ./upstreams.json:/etc/auditproxy/upstreams.json:ro
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/healthz"]
       interval: 5s
@@ -149,7 +149,7 @@ services:
       dockerfile: deploy/Dockerfile
       args:
         CMD: proxy
-    container_name: lustre-proxy
+    container_name: auditproxy-proxy
     depends_on:
       db-a:
         condition: service_healthy
@@ -204,7 +204,7 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile.edge
-    container_name: lustre-edge
+    container_name: auditproxy-edge
     depends_on:
       - api
     environment:

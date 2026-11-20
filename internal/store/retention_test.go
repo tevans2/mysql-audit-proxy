@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // cutoff for these tests: anything before 2026-09-15 is expired.

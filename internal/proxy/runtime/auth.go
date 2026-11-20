@@ -9,8 +9,8 @@ import (
 	"github.com/go-mysql-org/go-mysql/server"
 	"github.com/google/uuid"
 
-	"lustre/internal/audit"
-	"lustre/internal/passthrough"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/passthrough"
 )
 
 // authLoginTimeout bounds one client's whole login: the proxy's connection to

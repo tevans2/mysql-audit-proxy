@@ -24,7 +24,7 @@ import (
 	"sync"
 	"time"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // ApplyResult reports what happened when the Reconciler carried out one
