@@ -141,3 +141,19 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch and pull request workflow.
 | [Testing](docs/testing.md) | how the system is tested and how to build for testability |
 | [Performance](docs/perf/block-mode-rerun.md) | current measurements, and the [initial baseline](docs/perf/baseline.md) |
 | [Known limitations](docs/known-limitations.md) | what it does not do, the traps in the code, and possible next work |
+
+## Credits
+
+Built in 2026 by:
+
+| Contributor | Worked on |
+|---|---|
+| Joe Mudge | Proxy core, audit pipeline |
+| Mieke Wepener | Proxy core, audit pipeline |
+| Keagan Slabbert | Audit store, back-end API, data model |
+| Maria Kotze | Back-office UI |
+| Tate Evans | Infrastructure, testing, planning, integration |
+
+## License
+
+[MIT](LICENSE).
