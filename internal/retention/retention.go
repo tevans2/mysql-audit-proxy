@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"lustre/internal/store"
+	"github.com/tevans2/mysql-audit-proxy/internal/store"
 )
 
 // Action is what happens to a record when it expires.

@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"lustre/internal/audit"
-	"lustre/internal/passthrough"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/passthrough"
 )
 
 // ActiveSessions returns the number of client sessions this proxy is

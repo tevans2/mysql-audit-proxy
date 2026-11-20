@@ -13,9 +13,9 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"lustre/internal/api"
-	"lustre/internal/audit"
-	"lustre/internal/store"
+	"github.com/tevans2/mysql-audit-proxy/internal/api"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/store"
 )
 
 const bootstrapPass = "adminpass1"

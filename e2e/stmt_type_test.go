@@ -9,7 +9,7 @@ func TestCommentedStatementIsTypedByItsKeyword(t *testing.T) {
 	s := startStack(t, a, b)
 
 	db := s.openThroughProxy(t, a.name, aliceUser, alicePass(t), "")
-	const sql = "/* ApplicationName=e2e-tagged */ SELECT name FROM lustre_test.upstream_marker"
+	const sql = "/* ApplicationName=e2e-tagged */ SELECT name FROM auditproxy_test.upstream_marker"
 	if _, err := db.Exec(sql); err != nil {
 		t.Fatal(err)
 	}

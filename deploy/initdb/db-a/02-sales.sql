@@ -42,4 +42,4 @@ INSERT INTO sales.orders (customer_id, total_cents) VALUES
 -- instead of quietly connecting to the wrong server.
 CREATE USER 'sales_app'@'%' IDENTIFIED BY 'salespw';
 GRANT SELECT, INSERT, UPDATE, DELETE ON sales.* TO 'sales_app'@'%';
-GRANT SELECT ON lustre_test.* TO 'sales_app'@'%';
+GRANT SELECT ON auditproxy_test.* TO 'sales_app'@'%';

@@ -14,7 +14,7 @@ import (
 	"github.com/go-mysql-org/go-mysql/mysql"
 	sqldriver "github.com/go-sql-driver/mysql"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // ---------------------------------------------------------------------------

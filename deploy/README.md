@@ -28,7 +28,7 @@ wrong credentials, fails visibly instead of returning believable rows.
 | Host port | `3306` | `3316` |
 | Root | `root` / `rootpass` | `root` / `rootpass-b` |
 | Application user | `demo` / `demopass` · `sales_app` / `salespw` | `hr_app` / `hrpw` |
-| Databases | `demo`, `sales`, `lustre_test` | `hr`, `lustre_test` |
+| Databases | `demo`, `sales`, `auditproxy_test` | `hr`, `auditproxy_test` |
 | Tables | `sales.customers`, `sales.orders` | `hr.departments`, `hr.employees` |
 
 These are the development values from `.env.example`. `db-a` keeps its original identity
@@ -48,14 +48,14 @@ Both carry the same marker table with a different row, so one query identifies w
 server answered:
 
 ```sql
-SELECT name FROM lustre_test.upstream_marker;   -- 'db-a' or 'db-b'
+SELECT name FROM auditproxy_test.upstream_marker;   -- 'db-a' or 'db-b'
 ```
 
 That is the routing check: send it through a listener and the answer names the upstream it
 actually reached. Their schemas share no table names either, so a misrouted query against
 `sales.customers` or `hr.employees` errors with `Unknown database` rather than succeeding.
 
-> **`lustre_test` is test data, not real metadata.** It exists only so a routing check has
+> **`auditproxy_test` is test data, not real metadata.** It exists only so a routing check has
 > something to read: it holds no audit, configuration or customer data, nothing in the proxy
 > or API depends on it, and it must never be created on, or treated as part of, a real
 > upstream. It is seeded by `initdb/*/01-marker.sql` for the development stack only.
@@ -132,8 +132,8 @@ a literal in a committed file):
 
 | | Account | Grants |
 |---|---|---|
-| `db-a` | `alice` | `SELECT` on `sales.customers` and `lustre_test.upstream_marker` |
-| `db-b` | `bob` | `SELECT` on `hr.*` and `lustre_test.upstream_marker` |
+| `db-a` | `alice` | `SELECT` on `sales.customers` and `auditproxy_test.upstream_marker` |
+| `db-b` | `bob` | `SELECT` on `hr.*` and `auditproxy_test.upstream_marker` |
 | both | `proxy_bootstrap` | `USAGE` only: `SELECT 1` works, any table gives error 1142 |
 
 All use `caching_sha2_password`. The proxy passes each client's login through to the database:
@@ -189,8 +189,8 @@ than come up with an empty server list. To see what it seeded, log in and
 list the servers (this endpoint needs a session, which `curl` keeps in a cookie jar):
 
 ```bash
-curl -sk -c /tmp/lustre.jar https://localhost/api/login -d '{"username":"admin","password":"<admin password>"}'
-curl -sk -b /tmp/lustre.jar https://localhost/api/servers
+curl -sk -c /tmp/auditproxy.jar https://localhost/api/login -d '{"username":"admin","password":"<admin password>"}'
+curl -sk -b /tmp/auditproxy.jar https://localhost/api/servers
 ```
 
 The file holds no passwords. The API's seeded rows get theirs from `API_UPSTREAM_PASSWORDS`
@@ -312,7 +312,7 @@ make mysql-b   # the same for db-b on 3308, as bob
 
 # or a one-off query
 docker compose -f deploy/docker-compose.yml exec client \
-  mysql -h proxy-a -P 3307 -u alice -p"$DB_A_ALICE_PASSWORD" -e "SELECT name FROM lustre_test.upstream_marker;"
+  mysql -h proxy-a -P 3307 -u alice -p"$DB_A_ALICE_PASSWORD" -e "SELECT name FROM auditproxy_test.upstream_marker;"
 ```
 
 Each proxy passes the login through to its own database, so `alice` works through
@@ -405,7 +405,7 @@ Each server in `upstreams.json` or the configuration API accepts:
 ```json
 {
   "tls": "verify",
-  "tls_ca_file": "/etc/lustre/certs/database-ca.pem"
+  "tls_ca_file": "/etc/auditproxy/certs/database-ca.pem"
 }
 ```
 
@@ -420,7 +420,7 @@ Mount the CA bundle read-only **inside the proxy container**, for example under
 `services.proxy.volumes` in a Compose override:
 
 ```yaml
-- ./certs/database-ca.pem:/etc/lustre/certs/database-ca.pem:ro
+- ./certs/database-ca.pem:/etc/auditproxy/certs/database-ca.pem:ro
 ```
 
 The container's user (UID 10001) must be able to read it. This is a public CA

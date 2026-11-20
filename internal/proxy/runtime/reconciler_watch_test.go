@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // freeTCPPort returns a port that was free a moment ago. The listener is

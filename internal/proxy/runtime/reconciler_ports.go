@@ -5,8 +5,8 @@ import (
 	"sort"
 	"time"
 
-	"lustre/internal/audit"
-	"lustre/internal/upstream"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/upstream"
 )
 
 // schedule decides the order in which items are carried out; results are

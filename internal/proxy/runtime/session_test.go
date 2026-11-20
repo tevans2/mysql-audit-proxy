@@ -17,7 +17,7 @@ import (
 
 	sqldriver "github.com/go-sql-driver/mysql"
 
-	"lustre/internal/proxy/config"
+	"github.com/tevans2/mysql-audit-proxy/internal/proxy/config"
 )
 
 // Tests for Proxy.Run's context-cancellation lifecycle and session tracking —

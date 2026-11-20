@@ -29,7 +29,7 @@ COPY --from=build /out/app /usr/local/bin/app
 # /data is created here so the API's named volume inherits its ownership —
 # Docker seeds an empty named volume from the image, and a root-owned mount
 # point would leave the non-root process unable to write the SQLite file.
-RUN useradd --system --uid 10001 lustre \
+RUN useradd --system --uid 10001 auditproxy \
     && mkdir -p /data \
     && chown 10001:10001 /data
 USER 10001

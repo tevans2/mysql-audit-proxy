@@ -13,7 +13,7 @@ import (
 	"github.com/go-mysql-org/go-mysql/mysql"
 	"github.com/go-mysql-org/go-mysql/server"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // ---------------------------------------------------------------------------

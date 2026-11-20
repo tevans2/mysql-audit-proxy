@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"lustre/internal/proxy/config"
-	"lustre/internal/sink"
+	"github.com/tevans2/mysql-audit-proxy/internal/proxy/config"
+	"github.com/tevans2/mysql-audit-proxy/internal/sink"
 )
 
 // Run loads process configuration and starts the proxy.

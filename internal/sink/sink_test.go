@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 func quietLogger() *log.Logger { return log.New(io.Discard, "", 0) }

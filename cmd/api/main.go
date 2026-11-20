@@ -18,9 +18,9 @@ import (
 	"syscall"
 	"time"
 
-	"lustre/internal/api"
-	"lustre/internal/retention"
-	"lustre/internal/store"
+	"github.com/tevans2/mysql-audit-proxy/internal/api"
+	"github.com/tevans2/mysql-audit-proxy/internal/retention"
+	"github.com/tevans2/mysql-audit-proxy/internal/store"
 )
 
 const (
@@ -124,7 +124,7 @@ func routes(a *api.API) *http.ServeMux {
 
 func main() {
 	listenAddr := getEnv("API_LISTEN_ADDR", ":8080")
-	dbPath := getEnv("API_DB_PATH", "lustre.db")
+	dbPath := getEnv("API_DB_PATH", "auditproxy.db")
 
 	st, err := store.InitDB(dbPath)
 	if err != nil {

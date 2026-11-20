@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"os"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // TLSConfig verifies the configured DNS name or IP, never the resolved address.

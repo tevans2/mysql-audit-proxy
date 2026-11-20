@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"lustre/internal/proxy/config"
+	"github.com/tevans2/mysql-audit-proxy/internal/proxy/config"
 )
 
 // heartbeatInterval is how often an idle proxy re-reports the revision it is

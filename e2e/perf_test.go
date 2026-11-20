@@ -1,4 +1,4 @@
-// Performance baseline for the proxy: what does putting Lustre in front of a
+// Performance baseline for the proxy: what does putting the proxy in front of a
 // database cost, at the 25-50 concurrent connections the client specified?
 //
 // These are measurements, not assertions, so they are gated on PERF=1 and

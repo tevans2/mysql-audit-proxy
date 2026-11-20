@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"lustre/internal/sink"
+	"github.com/tevans2/mysql-audit-proxy/internal/sink"
 )
 
 type fakeStats struct {
@@ -68,19 +68,19 @@ func TestMetricsExposeQueueDepthAndDropCount(t *testing.T) {
 		t.Fatalf("got %d, want 200", code)
 	}
 	for _, want := range []string{
-		"lustre_audit_queue_depth 7\n",
-		"lustre_audit_emitted_total 10\n",
-		"lustre_audit_sent_total 6\n",
-		"lustre_audit_dropped_total 3\n",
-		"lustre_audit_failed_total 1\n",
-		"# TYPE lustre_audit_dropped_total counter\n",
-		"# TYPE lustre_audit_queue_depth gauge\n",
+		"auditproxy_audit_queue_depth 7\n",
+		"auditproxy_audit_emitted_total 10\n",
+		"auditproxy_audit_sent_total 6\n",
+		"auditproxy_audit_dropped_total 3\n",
+		"auditproxy_audit_failed_total 1\n",
+		"# TYPE auditproxy_audit_dropped_total counter\n",
+		"# TYPE auditproxy_audit_queue_depth gauge\n",
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("metrics missing %q:\n%s", want, body)
 		}
 	}
-	if strings.Contains(body, "lustre_config_applied_revision") {
+	if strings.Contains(body, "auditproxy_config_applied_revision") {
 		t.Error("applied revision reported with no source for it")
 	}
 }
@@ -95,10 +95,10 @@ func TestMetricsWithoutASinkOmitsAuditLines(t *testing.T) {
 	if code != http.StatusOK {
 		t.Fatalf("got %d, want 200", code)
 	}
-	if strings.Contains(body, "lustre_audit_") {
+	if strings.Contains(body, "auditproxy_audit_") {
 		t.Errorf("audit metrics reported with no sink behind them:\n%s", body)
 	}
-	if !strings.Contains(body, "lustre_config_applied_revision 5\n") {
+	if !strings.Contains(body, "auditproxy_config_applied_revision 5\n") {
 		t.Errorf("applied revision missing:\n%s", body)
 	}
 }

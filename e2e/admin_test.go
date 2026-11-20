@@ -48,18 +48,18 @@ func TestProxyAdminReportsHealthAndAuditCounters(t *testing.T) {
 	}
 
 	for _, m := range []string{
-		"lustre_audit_queue_depth", "lustre_audit_emitted_total", "lustre_audit_sent_total",
-		"lustre_audit_dropped_total", "lustre_audit_failed_total",
+		"auditproxy_audit_queue_depth", "auditproxy_audit_emitted_total", "auditproxy_audit_sent_total",
+		"auditproxy_audit_dropped_total", "auditproxy_audit_failed_total",
 	} {
 		if s.metricValue(t, m) < 0 {
 			t.Errorf("/metrics has no %s", m)
 		}
 	}
-	if got := s.metricValue(t, "lustre_config_applied_revision"); got < 1 {
-		t.Errorf("lustre_config_applied_revision = %d, want at least 1 once the config is applied", got)
+	if got := s.metricValue(t, "auditproxy_config_applied_revision"); got < 1 {
+		t.Errorf("auditproxy_config_applied_revision = %d, want at least 1 once the config is applied", got)
 	}
 
-	before := s.metricValue(t, "lustre_audit_emitted_total")
+	before := s.metricValue(t, "auditproxy_audit_emitted_total")
 	db := s.openThroughProxy(t, a.name, aliceUser, alicePass(t), "")
 	if err := db.Ping(); err != nil {
 		t.Fatalf("login: %v", err)
@@ -69,16 +69,16 @@ func TestProxyAdminReportsHealthAndAuditCounters(t *testing.T) {
 	}
 
 	deadline := time.Now().Add(auditTimeout)
-	for s.metricValue(t, "lustre_audit_sent_total") < 1 && time.Now().Before(deadline) {
+	for s.metricValue(t, "auditproxy_audit_sent_total") < 1 && time.Now().Before(deadline) {
 		time.Sleep(200 * time.Millisecond)
 	}
-	if after := s.metricValue(t, "lustre_audit_emitted_total"); after <= before {
+	if after := s.metricValue(t, "auditproxy_audit_emitted_total"); after <= before {
 		t.Errorf("emitted_total did not move after a login and a query: %d -> %d", before, after)
 	}
-	if got := s.metricValue(t, "lustre_audit_sent_total"); got < 1 {
+	if got := s.metricValue(t, "auditproxy_audit_sent_total"); got < 1 {
 		t.Errorf("sent_total = %d, want events delivered to the API", got)
 	}
-	if got := s.metricValue(t, "lustre_audit_dropped_total"); got != 0 {
+	if got := s.metricValue(t, "auditproxy_audit_dropped_total"); got != 0 {
 		t.Errorf("dropped_total = %d in a healthy run, want 0", got)
 	}
 }

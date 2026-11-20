@@ -16,7 +16,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 /*
@@ -560,7 +560,7 @@ func TestUpdateAndDeleteServerUnknownIDReturnsErrNoRows(t *testing.T) {
  * Uses a file-backed database to allow multiple pooled connections.
  */
 func TestGetServersAndRevisionAtomicity(t *testing.T) {
-	dbFile, err := os.CreateTemp("", "lustre-store-*.db")
+	dbFile, err := os.CreateTemp("", "auditproxy-store-*.db")
 	if err != nil {
 		t.Fatalf("failed to create temp db file: %v", err)
 	}
@@ -936,7 +936,7 @@ func TestHideHandshakeMatchesRealClientTraffic(t *testing.T) {
 	}
 	kept := []string{
 		"SELECT * FROM sales.customers",
-		"SELECT name FROM lustre_test.upstream_marker",
+		"SELECT name FROM auditproxy_test.upstream_marker",
 		"DELETE FROM sales.orders WHERE id = 7",
 		"SHOW TABLES",
 		"SELECT version_comment FROM audit_notes",

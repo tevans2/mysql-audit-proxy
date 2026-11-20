@@ -50,7 +50,7 @@ it, so the payload encoder is ours: 40 lines, in `changeuser.go`.
 
 Both routes run from one binary (`-mode shim|changeuser`) so the same client drives both and the
 comparison is an A/B rather than two write-ups. MySQL 8.0.46 upstream over plaintext; `spike_*`
-accounts granted `SELECT` on `sales.customers` and nothing else; `lustre_bootstrap` holds
+accounts granted `SELECT` on `sales.customers` and nothing else; `auditproxy_bootstrap` holds
 `GRANT USAGE ON *.*` — that is, no privileges at all.
 
 ### Login matrix — identical, case for case
@@ -139,8 +139,8 @@ reads it today. Cosmetic, and a reader will trip over it.
 bootstrap password the client sees:
 
 ```
-ERROR 1105 (HY000): bootstrap connect as "lustre_bootstrap": handleAuthResult:
-  ERROR 1045 (28000): Access denied for user 'lustre_bootstrap'@'192.168.147.1' (using password: YES)
+ERROR 1105 (HY000): bootstrap connect as "auditproxy_bootstrap": handleAuthResult:
+  ERROR 1045 (28000): Access denied for user 'auditproxy_bootstrap'@'192.168.147.1' (using password: YES)
 ```
 
 and the proxy logs `auth_fail user=spike_native`. Two problems, both ours and both easy:
@@ -193,11 +193,11 @@ docker exec -e MYSQL_PWD="$DB_A_ROOT_PASSWORD" proxy-upstream-db-a mysql -uroot 
   CREATE USER 'spike_native'@'%' IDENTIFIED WITH mysql_native_password BY 'Spike#Pass1';
   CREATE USER 'spike_sha2'@'%'   IDENTIFIED WITH caching_sha2_password BY 'Spike#Pass2';
   GRANT SELECT ON sales.customers TO 'spike_native'@'%', 'spike_sha2'@'%';
-  CREATE USER 'lustre_bootstrap'@'%' IDENTIFIED WITH caching_sha2_password BY 'Bootstrap#Pass';"
+  CREATE USER 'auditproxy_bootstrap'@'%' IDENTIFIED WITH caching_sha2_password BY 'Bootstrap#Pass';"
 
 # the two routes, side by side
 go run ./cmd/spike-passthrough -listen 0.0.0.0:4306 -upstream 127.0.0.1:3306 \
-    -mode changeuser -bootstrap-user lustre_bootstrap -bootstrap-pass 'Bootstrap#Pass'
+    -mode changeuser -bootstrap-user auditproxy_bootstrap -bootstrap-pass 'Bootstrap#Pass'
 go run ./cmd/spike-passthrough -listen 0.0.0.0:4307 -upstream 127.0.0.1:3306 -mode shim
 
 # command-phase checks through go-sql-driver, against either

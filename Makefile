@@ -1,4 +1,4 @@
-# Lustre — common tasks. `make help` lists them.
+# MySQL Audit Proxy — common tasks. `make help` lists them.
 
 COMPOSE := docker compose -f deploy/docker-compose.yml
 # Compose reads the stack's secrets from here (gitignored). Every target that
@@ -52,7 +52,7 @@ fmt: ## Rewrite files with gofmt
 run-proxy: ## Run the proxy against a local upstream
 	go run ./cmd/proxy
 
-run-api: ## Run the API against ./lustre.db
+run-api: ## Run the API against ./auditproxy.db
 	go run ./cmd/api
 
 # No prerequisite on .env.example on purpose: a newer template must never
@@ -75,11 +75,11 @@ test-env: $(ENV) ## Start just the two upstream databases (db-a, db-b)
 test-env-check: $(ENV) ## Verify each upstream answers as itself with its own schema
 	@echo "db-a  (127.0.0.1:3306)"
 	@$(COMPOSE) exec -T db-a $(MYSQL_AS_ROOT) -N -B \
-		-e "SELECT CONCAT('  marker: ', name) FROM lustre_test.upstream_marker; \
+		-e "SELECT CONCAT('  marker: ', name) FROM auditproxy_test.upstream_marker; \
 		    SELECT CONCAT('  sales.customers rows: ', COUNT(*)) FROM sales.customers;" 2>/dev/null
 	@echo "db-b  (127.0.0.1:3316)"
 	@$(COMPOSE) exec -T db-b $(MYSQL_AS_ROOT) -N -B \
-		-e "SELECT CONCAT('  marker: ', name) FROM lustre_test.upstream_marker; \
+		-e "SELECT CONCAT('  marker: ', name) FROM auditproxy_test.upstream_marker; \
 		    SELECT CONCAT('  hr.employees rows: ', COUNT(*)) FROM hr.employees;" 2>/dev/null
 	@echo "both upstreams up and distinguishable"
 
@@ -122,7 +122,7 @@ routes: $(ENV) ## Verify each proxy port reaches its own upstream (needs the ful
 		set -- $$tuple; port=$$1; want=$$2; user=$$3; pw=$$(printenv $$4); \
 		got=$$($(COMPOSE) exec -T -e MYSQL_PWD="$$pw" client mysql -h proxy-$${want#db-} -P $$port \
 			-u $$user -N -B \
-			-e "SELECT name FROM lustre_test.upstream_marker;" 2>/dev/null | tr -d '\r'); \
+			-e "SELECT name FROM auditproxy_test.upstream_marker;" 2>/dev/null | tr -d '\r'); \
 		if [ "$$got" = "$$want" ]; then \
 			echo "  :$$port -> $$got"; \
 		else \
@@ -145,7 +145,7 @@ logs: $(ENV) ## Follow proxy and API logs
 	$(COMPOSE) logs -f proxy api
 
 clean: ## Remove built binaries and the local audit database
-	rm -rf $(BIN) lustre.db lustre.db-shm lustre.db-wal
+	rm -rf $(BIN) auditproxy.db auditproxy.db-shm auditproxy.db-wal
 
 .PHONY: test-tls test-tls-down
 test-tls: ## Mandatory TLS acceptance checks in an isolated MySQL stack (set TLS_TEST_PASSWORD)

@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 
 	"github.com/go-sql-driver/mysql"
 )
@@ -336,8 +336,8 @@ func TestPassThroughRevokedGrantTakesEffectOnTheNextSessionWithoutAProxyChange(t
 	a, b := upstreams(t)
 	s := startStack(t, a, b)
 
-	const query = "SELECT name FROM lustre_test.upstream_marker"
-	user, pass := createTempUser(t, a, "e2e_revoke", "GRANT SELECT ON lustre_test.upstream_marker TO %s")
+	const query = "SELECT name FROM auditproxy_test.upstream_marker"
+	user, pass := createTempUser(t, a, "e2e_revoke", "GRANT SELECT ON auditproxy_test.upstream_marker TO %s")
 
 	first := s.openThroughProxy(t, a.name, user, pass, "")
 	var name string
@@ -347,7 +347,7 @@ func TestPassThroughRevokedGrantTakesEffectOnTheNextSessionWithoutAProxyChange(t
 
 	root := openDirect(t, a, a.user, a.pass)
 	defer root.Close()
-	if _, err := root.Exec(fmt.Sprintf("REVOKE SELECT ON lustre_test.upstream_marker FROM '%s'@'%%'", user)); err != nil {
+	if _, err := root.Exec(fmt.Sprintf("REVOKE SELECT ON auditproxy_test.upstream_marker FROM '%s'@'%%'", user)); err != nil {
 		t.Fatalf("revoking: %v", err)
 	}
 

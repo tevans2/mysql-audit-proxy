@@ -16,8 +16,8 @@ import (
 	"github.com/go-mysql-org/go-mysql/mysql"
 	sqldriver "github.com/go-sql-driver/mysql"
 
-	"lustre/internal/audit"
-	"lustre/internal/proxy/config"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/proxy/config"
 )
 
 // TestVerify_PlaintextClientIsRefused connects without TLS. The proxy relays
@@ -178,7 +178,7 @@ func TestUpstreamTLSStartup(t *testing.T) {
 		t.Fatal("missing startup warning")
 	}
 	p.TLS = "verify"
-	p.TLSCAFile = "/nonexistent/lustre-test-ca"
+	p.TLSCAFile = "/nonexistent/auditproxy-test-ca"
 	if err := p.Run(context.Background(), nil); err == nil {
 		t.Fatal("invalid CA did not fail startup")
 	}

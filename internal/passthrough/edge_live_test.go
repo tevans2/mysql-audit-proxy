@@ -32,7 +32,7 @@ func sqlStr(s string) string {
 
 // newCustomAccount creates an account with exactly this name and password.
 // options is appended after IDENTIFIED BY (for example " ACCOUNT LOCK"). With
-// grant it may read lustre_pt.customers.
+// grant it may read auditproxy_pt.customers.
 func (db *liveDB) newCustomAccount(t *testing.T, name, password, options string, grant bool) account {
 	t.Helper()
 	db.exec(t, "%s", fmt.Sprintf("CREATE USER %s@'%%' IDENTIFIED BY %s%s", sqlStr(name), sqlStr(password), options))
@@ -42,7 +42,7 @@ func (db *liveDB) newCustomAccount(t *testing.T, name, password, options string,
 		_, _ = db.admin.Execute(fmt.Sprintf("DROP USER IF EXISTS %s@'%%'", sqlStr(name)))
 	})
 	if grant {
-		db.exec(t, "%s", fmt.Sprintf("GRANT SELECT ON lustre_pt.customers TO %s@'%%'", sqlStr(name)))
+		db.exec(t, "%s", fmt.Sprintf("GRANT SELECT ON auditproxy_pt.customers TO %s@'%%'", sqlStr(name)))
 	}
 	if password != "" {
 		db.mu.Lock()
@@ -148,7 +148,7 @@ func TestEdgeUnusualNamesAndPasswords(t *testing.T) {
 			if got, _ := res.GetString(0, 0); got != c.name+"@%" {
 				t.Errorf("CURRENT_USER() = %q, want %q", got, c.name+"@%")
 			}
-			if _, err := conn.Execute("SELECT COUNT(*) FROM lustre_pt.customers"); err != nil {
+			if _, err := conn.Execute("SELECT COUNT(*) FROM auditproxy_pt.customers"); err != nil {
 				t.Errorf("granted table: %v", err)
 			}
 		})

@@ -11,8 +11,8 @@ import (
 	"reflect"
 	"testing"
 
-	"lustre/internal/audit"
-	"lustre/internal/proxy/config"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/proxy/config"
 )
 
 func serverA() audit.Server {

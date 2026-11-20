@@ -15,7 +15,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // What Emit does when the buffer is full.

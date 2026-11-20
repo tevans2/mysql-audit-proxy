@@ -1,5 +1,5 @@
 # Isolated from the normal development stack: no fixed container names or volumes.
-name: lustre-tls-test
+name: auditproxy-tls-test
 x-mysql: &mysql
   image: mysql:8.0
   environment:

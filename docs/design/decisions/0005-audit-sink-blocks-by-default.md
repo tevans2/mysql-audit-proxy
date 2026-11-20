@@ -74,7 +74,7 @@ records. See `cmd/proxy/README.md`.
   open commitment the perf baseline ranked first. This ADR
   doesn't implement that monitoring; it only changes the buffer-full
   behaviour. *Resolved later (#49): the proxy now serves
-  `lustre_audit_queue_depth`, `lustre_audit_dropped_total` and the other sink
+  `auditproxy_audit_queue_depth`, `auditproxy_audit_dropped_total` and the other sink
   counters on its admin port; see `cmd/proxy/README.md`. Nothing displays or
   alerts on them.*
 

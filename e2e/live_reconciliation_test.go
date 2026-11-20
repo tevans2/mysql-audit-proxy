@@ -34,7 +34,7 @@ import (
 
 	"database/sql"
 
-	"lustre/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
 )
 
 // managedProc is a subprocess a test can stop (and, unlike start() in
@@ -177,7 +177,7 @@ func startLiveStack(t *testing.T, opts liveStackOpts, ups ...upstream) *liveStac
 	apiURL := fmt.Sprintf("http://127.0.0.1:%d", apiPort)
 	apiEnv := []string{
 		fmt.Sprintf("API_LISTEN_ADDR=127.0.0.1:%d", apiPort),
-		"API_DB_PATH=" + filepath.Join(dir, "lustre.db"),
+		"API_DB_PATH=" + filepath.Join(dir, "auditproxy.db"),
 		"API_ADMIN_PASS_HASH=$2a$10$p/JfpdaXDpAp5XhXeDax6OdUOClgnJGA8zH3X7Gxrf0dv5zvjb/UW",
 		"API_CONFIG_KEY=0123456789abcdef0123456789abcdef",
 		"API_PROXY_TOKEN=e2e-live-secret-token",

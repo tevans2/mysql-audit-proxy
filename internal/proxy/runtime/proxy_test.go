@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"lustre/internal/audit"
-	"lustre/internal/proxy/config"
+	"github.com/tevans2/mysql-audit-proxy/internal/audit"
+	"github.com/tevans2/mysql-audit-proxy/internal/proxy/config"
 )
 
 // TestProxyConnectEvent verifies that connecting a MySQL client through the
@@ -378,7 +378,7 @@ func TestMultiUpstreamRouting(t *testing.T) {
 		defer db.Close()
 
 		var name string
-		if err := db.QueryRow("SELECT name FROM lustre_test.upstream_marker ORDER BY name LIMIT 1").Scan(&name); err != nil {
+		if err := db.QueryRow("SELECT name FROM auditproxy_test.upstream_marker ORDER BY name LIMIT 1").Scan(&name); err != nil {
 			t.Fatalf("querying marker through %s: %v", proxyAddr, err)
 		}
 		return name
